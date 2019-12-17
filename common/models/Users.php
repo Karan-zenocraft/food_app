@@ -37,19 +37,24 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     /**
      * {@inheritdoc}
      */
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
-            [['role_id', 'age', 'gender', 'badge_count', 'status', 'restaurant_id'], 'integer'],
+            [['role_id', 'badge_count', 'status', 'restaurant_id', 'phone'], 'integer'],
+            [['verification_code', 'password_reset_token', 'auth_token'], 'required'],
+            [['is_code_verified', 'password_reset_token'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['user_name', 'email', 'password', 'photo'], 'string', 'max' => 255],
+            [['user_name', 'email', 'password', 'photo', 'verification_code', 'auth_token'], 'string', 'max' => 255],
             [['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRoles::className(), 'targetAttribute' => ['role_id' => 'id']],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+/**
+ * @inheritdoc
+ */
     public function attributeLabels()
     {
         return [
@@ -58,14 +63,17 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'user_name' => 'User Name',
             'email' => 'Email',
             'password' => 'Password',
-            'age' => 'Age',
-            'gender' => 'Gender',
             'photo' => 'Photo',
+            'verification_code' => 'Verification Code',
+            'is_code_verified' => 'Is Code Verified',
+            'password_reset_token' => 'Password Reset Token',
+            'auth_token' => 'Auth Token',
             'badge_count' => 'Badge Count',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'restaurant_id' => 'Restaurant ID',
+            'phone' => 'Contact No',
         ];
     }
 

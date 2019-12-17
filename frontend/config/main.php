@@ -38,13 +38,13 @@ return [
         ],
         'request' => [
             'csrfParam' => '_csrf-frontend',
-            'baseUrl' => ($_SERVER['HTTP_HOST'] == "localhost") ? '/food_app' : '',
+            'baseUrl' => ($_SERVER['HTTP_HOST'] == "localhost") ? '/food_app' : '/food_app',
         ],
 
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'scriptUrl' => ($_SERVER['HTTP_HOST'] == "localhost") ? '/food_app' : '',
+            'scriptUrl' => ($_SERVER['HTTP_HOST'] == "localhost") ? '/food_app' : '/food_app',
             'rules' => [
             ],
         ],

@@ -1,11 +1,11 @@
 <?php
 if ($_SERVER['HTTP_HOST'] == "localhost") {
 
-    Yii::setAlias('@common_base', '/parliament/common/');
+    Yii::setAlias('@common_base', '/food_app/common/');
 
 } else {
 
-    Yii::setAlias('@common_base', '/common/');
+    Yii::setAlias('@common_base', '/food_app/common/');
 }
 Yii::setAlias('common', dirname(__DIR__));
 Yii::setAlias('api', dirname(dirname(__DIR__)) . '/api'); // add api alias

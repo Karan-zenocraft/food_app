@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use common\models\DeviceDetails;
+use common\models\UserAddress;
 use Yii;
 
 /**
@@ -36,19 +38,24 @@ class Users extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
-            [['role_id', 'age', 'gender', 'badge_count', 'status', 'restaurant_id'], 'integer'],
+            [['role_id', 'badge_count', 'status', 'restaurant_id'], 'integer'],
+            [['verification_code', 'password_reset_token', 'auth_token'], 'required'],
+            [['is_code_verified', 'password_reset_token'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['user_name', 'email', 'password', 'photo'], 'string', 'max' => 255],
-            [['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRole::className(), 'targetAttribute' => ['role_id' => 'id']],
+            [['user_name', 'email', 'password', 'photo', 'verification_code', 'auth_token'], 'string', 'max' => 255],
+            [['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRoles::className(), 'targetAttribute' => ['role_id' => 'id']],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+/**
+ * @inheritdoc
+ */
     public function attributeLabels()
     {
         return [
@@ -57,9 +64,11 @@ class Users extends \yii\db\ActiveRecord
             'user_name' => 'User Name',
             'email' => 'Email',
             'password' => 'Password',
-            'age' => 'Age',
-            'gender' => 'Gender',
             'photo' => 'Photo',
+            'verification_code' => 'Verification Code',
+            'is_code_verified' => 'Is Code Verified',
+            'password_reset_token' => 'Password Reset Token',
+            'auth_token' => 'Auth Token',
             'badge_count' => 'Badge Count',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -83,5 +92,21 @@ class Users extends \yii\db\ActiveRecord
     public static function find()
     {
         return new UsersQuery(get_called_class());
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserAddresses()
+    {
+        return $this->hasMany(UserAddress::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDeviceDetails()
+    {
+        return 'users';
+        return $this->hasMany(DeviceDetails::className(), ['user_id' => 'id']);
     }
 }

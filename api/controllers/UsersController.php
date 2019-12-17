@@ -103,7 +103,7 @@ class UsersController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('first_name', 'last_name', 'user_email', 'password', 'device_id', 'device_type', 'country_code', 'phone', 'birth_date', 'gender');
+        $amRequiredParams = array('role', 'user_name', 'email', 'password', 'device_id', 'phone');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -114,14 +114,17 @@ class UsersController extends \yii\base\Controller
 
         $requestParam = $amData['request_param'];
         $requestFileparam = $amData['file_param'];
-
         if (empty($requestParam['user_id'])) {
-            if (!empty(Users::findOne(["email" => $requestParam['user_email']]))) {
+            if (!empty(Users::find()->where(["email" => $requestParam['email']])->one())) {
                 $amResponse = Common::errorResponse("This Email id is already registered.");
                 Common::encodeResponseJSON($amResponse);
             }
-            if (!empty(Users::findOne(["phone" => $requestParam['phone']]))) {
+            if (!empty(Users::find()->where(["phone" => $requestParam['phone']])->one())) {
                 $amResponse = Common::errorResponse("Phone you entered is already registered by other user.");
+                Common::encodeResponseJSON($amResponse);
+            }
+            if (!empty(Users::find()->where(["user_name" => $requestParam['user_name']])->one())) {
+                $amResponse = Common::errorResponse("This user name is not avalaible.Please try another user name");
                 Common::encodeResponseJSON($amResponse);
             }
             $model = new Users();
@@ -130,7 +133,7 @@ class UsersController extends \yii\base\Controller
             $model = Users::findOne(["id" => $snUserId]);
             if (!empty($model)) {
                 $ssEmail = $model->email;
-                $modelUser = Users::find()->where("id != '" . $snUserId . "' AND email = '" . $requestParam['user_email'] . "'")->all();
+                $modelUser = Users::find()->where("id != '" . $snUserId . "' AND email = '" . $requestParam['email'] . "'")->all();
                 if (!empty($modelUser)) {
                     $amResponse = Common::errorResponse("Email you entered is already registred by other user.");
                     Common::encodeResponseJSON($amResponse);
@@ -140,6 +143,11 @@ class UsersController extends \yii\base\Controller
                     $amResponse = Common::errorResponse("Phone you entered is already registered by other user.");
                     Common::encodeResponseJSON($amResponse);
                 }
+                $modelUserr = Users::find()->where("id != '" . $snUserId . "' AND user_name = '" . $requestParam['user_name'] . "'")->all();
+                if (!empty($modelUserr)) {
+                    $amResponse = Common::errorResponse("This user name is not avalaible.Please try another user name");
+                    Common::encodeResponseJSON($amResponse);
+                }
             }
         }
 
@@ -147,48 +155,36 @@ class UsersController extends \yii\base\Controller
         $Textmessage = "Your verification code is : " . $SnRandomNumber;
         // Common::sendSms( $Textmessage, "$requestParam[phone]" );
         // Database field
-        $model->first_name = $requestParam['first_name'];
-        $model->last_name = $requestParam['last_name'];
-        $model->email = $requestParam['user_email'];
+        $model->user_name = $requestParam['user_name'];
+        $model->email = $requestParam['email'];
         $model->password = md5($requestParam['password']);
-        $model->address_line_1 = !empty($requestParam['address_line_1']) ? $requestParam['address_line_1'] : "";
-        $model->country_code = $requestParam['country_code'];
-        $model->phone = Common::clean_special_characters($requestParam['phone']);
-        $model->gender = Yii::$app->params['gender'][$requestParam['gender']];
+        /* $model->address_line_1 = !empty($requestParam['address_line_1']) ? $requestParam['address_line_1'] : "";*/
+        $model->phone = !empty($requestParam['phone']) ? Common::clean_special_characters($requestParam['phone']) : "";
         $model->verification_code = $SnRandomNumber;
-        $model->birth_date = date("Y-m-d", strtotime($requestParam['birth_date']));
-        $model->user_initial_longitude = !empty($requestParam['user_initial_longitude']) ? $requestParam['user_initial_longitude'] : "";
-        $model->user_initial_latitude = !empty($requestParam['user_initial_latitude']) ? $requestParam['user_initial_latitude'] : "";
-        $model->event_radious_range = !empty($requestParam['event_radious_range']) ? $requestParam['event_radious_range'] : 20;
-        $model->role_id = Yii::$app->params['userroles']['application_users'];
-        $model->notification_status = Yii::$app->params['notification_status']['active'];
-        $model->created_at = date('Y-m-d H:i:s');
-        $model->updated_at = date('Y-m-d H:i:s');
-        $model->status = Yii::$app->params['status']['active'];
+        $model->role_id = $requestParam['role'];
+        $model->status = Yii::$app->params['user_status_value']['active'];
         $ssAuthToken = Common::generateToken($model->id);
         $model->auth_token = $ssAuthToken;
+        if (isset($requestFileparam['photo']['name'])) {
 
-        if (isset($requestFileparam['image']['name'])) {
-
-            $model->user_image = UploadedFile::getInstanceByName('image');
-            $Modifier = md5(($model->user_image));
+            $model->photo = UploadedFile::getInstanceByName('photo');
+            $Modifier = md5(($model->photo));
             $OriginalModifier = $Modifier . rand(11111, 99999);
-            $Extension = $model->user_image->extension;
-            $model->user_image->saveAs(Yii::$app->params['upload_user_image'] . $OriginalModifier . '.' . $model->user_image->extension);
-            $model->user_image = $OriginalModifier . '.' . $Extension;
+            $Extension = $model->photo->extension;
+            $model->photo->saveAs(__DIR__ . "../../../uploads/" . $OriginalModifier . '.' . $model->photo->extension);
+            $model->photo = $OriginalModifier . '.' . $Extension;
         }
         if ($model->save(false)) {
             // Device Registration
-            if (($device_model = Devicedetails::findOne([/*'gcm_id' => $amData['request_param']['gcm_registration_id'], */'type' => $amData['request_param']['device_type'], 'userid' => $model->id])) === null) {
+            if (($device_model = Devicedetails::findOne([/*'gcm_id' => $amData['request_param']['gcm_registration_id'], */'user_id' => $model->id])) === null) {
                 $device_model = new Devicedetails();
             }
 
             $device_model->setAttributes($amData['request_param']);
             $device_model->device_tocken = $requestParam['device_id'];
-            $device_model->type = $requestParam['device_type'];
+            $device_model->type = 1;
             $device_model->gcm_id = !empty($requestParam['gcm_registration_id']) ? $requestParam['gcm_registration_id'] : "";
-            $device_model->userid = $model->id;
-            $device_model->created_at = date('Y-m-d H:i:s');
+            $device_model->user_id = $model->id;
             $device_model->save(false);
 
             ///////////////////////////////////////////////////////////
@@ -197,12 +193,12 @@ class UsersController extends \yii\base\Controller
             if (empty($ssEmail)) {
                 $ssEmail = $model->email;
             }
-            if (empty($requestParam['user_id']) || ($ssEmail != $requestParam['user_email'])) {
-                $emailformatemodel = EmailFormat::findOne(["title" => 'welcome', "status" => '1']);
+            if (empty($requestParam['user_id']) || ($ssEmail != $requestParam['email'])) {
+                $emailformatemodel = EmailFormat::findOne(["title" => 'user_registration', "status" => '1']);
                 if ($emailformatemodel) {
 
                     //create template file
-                    $AreplaceString = array('{password}' => $requestParam['password'], '{username}' => $model->first_name . " " . $model->last_name, '{email}' => $model->email);
+                    $AreplaceString = array('{password}' => $requestParam['password'], '{username}' => $model->user_name, '{email}' => $model->email);
 
                     $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
                     $ssSubject = $emailformatemodel->subject;
@@ -213,23 +209,14 @@ class UsersController extends \yii\base\Controller
             }
 
             $ssMessage = 'You are successfully registered.';
-            $amReponseParam['user_email'] = $model->email;
+            $amReponseParam['email'] = $model->email;
             $amReponseParam['user_id'] = $model->id;
-            $amReponseParam['first_name'] = $model->first_name;
-            $amReponseParam['last_name'] = $model->last_name;
-            $amReponseParam['address_line_1'] = !empty($model->address_line_1) ? $model->address_line_1 : "";
-            $amReponseParam['country_code'] = $model->country_code;
+            $amReponseParam['role'] = $model->role_id;
+            $amReponseParam['user_name'] = $model->user_name;
             $amReponseParam['phone'] = $model->phone;
             $amReponseParam['verification_code'] = $model->verification_code;
-            $amReponseParam['birth_date'] = date("d-m-Y", strtotime($model->birth_date));
-            $amReponseParam['gender'] = Yii::$app->params['gender_value'][$model->gender];
-            $amReponseParam['user_initial_longitude'] = !empty($model->user_initial_longitude) ? $model->user_initial_longitude : "";
-            $amReponseParam['user_initial_latitude'] = !empty($model->user_initial_latitude) ? $model->user_initial_latitude : "";
-            $amReponseParam['event_radious_range'] = !empty($model->event_radious_range) ? $model->event_radious_range : '';
-            $amReponseParam['is_mobile_verified'] = !empty($model->is_code_verified) && ($model->is_code_verified > 0) ? $model->is_code_verified : 0;
-            $amReponseParam['image'] = !empty($model->user_image) && file_exists(Yii::$app->params['upload_user_image'] . $model->user_image) ? Yii::getAlias('@host') . '/' . "uploads/profile_pictures/" . $model->user_image : Yii::getAlias('@host') . '/' . "uploads/no_image.png";
+            $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
             $amReponseParam['device_token'] = $device_model->device_tocken;
-            $amReponseParam['device_type'] = Yii::$app->params['device_type_value'][$device_model->type];
             $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
             $amReponseParam['auth_token'] = $ssAuthToken;
 
@@ -365,7 +352,7 @@ class UsersController extends \yii\base\Controller
             if ($model->save()) {
                 $ssMessage = 'Your password has been changed successfully.';
                 $amReponseParam['user_id'] = $model->id;
-                $amReponseParam['user_email'] = $model->email;
+                $amReponseParam['email'] = $model->email;
                 $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
             }
         } else {
