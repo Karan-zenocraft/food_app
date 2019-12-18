@@ -33,55 +33,172 @@ class UsersController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_email', 'password', 'device_id');
+        $amRequiredParams = array('login_type');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
-
-        // If any getting error in request paramter then set error message.
         if (!empty($amParamsResult['error'])) {
             $amResponse = Common::errorResponse($amParamsResult['error']);
             Common::encodeResponseJSON($amResponse);
         }
-
         $requestParam = $amData['request_param'];
+        if ($requestParam['login_type'] == "1") {
+            $amRequiredParams = array('email', 'password', 'device_id', 'login_type');
+            $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
-        if (($model = Users::findOne(['email' => $requestParam['user_email'], 'password' => md5($requestParam['password'])])) !== null) {
+            // If any getting error in request paramter then set error message.
+            if (!empty($amParamsResult['error'])) {
+                $amResponse = Common::errorResponse($amParamsResult['error']);
+                Common::encodeResponseJSON($amResponse);
+            }
 
-            if (($modell = Users::findOne(['email' => $requestParam['user_email'], 'password' => md5($requestParam['password']), 'role_id' => [Yii::$app->params['userroles']['super_admin'], Yii::$app->params['userroles']['admin'], Yii::$app->params['userroles']['supervisor'], Yii::$app->params['userroles']['customer']]])) !== null) {
-                $ssMessage = ' You are not authorize to login.';
-                $amResponse = Common::errorResponse($ssMessage);
-            } else if (($model1 = Users::findOne(['email' => $requestParam['user_email'], 'password' => md5($requestParam['password']), 'status' => "0"])) !== null) {
-                $ssMessage = ' User has been deactivated. Please contact admin.';
-                $amResponse = Common::errorResponse($ssMessage);
+            if (($model = Users::findOne(['email' => $requestParam['email'], 'password' => md5($requestParam['password'])])) !== null) {
+
+                if (($modell = Users::findOne(['email' => $requestParam['email'], 'password' => md5($requestParam['password']), 'role_id' => [Yii::$app->params['userroles']['super_admin'], Yii::$app->params['userroles']['admin']]])) !== null) {
+                    $ssMessage = ' You are not authorize to login.';
+                    $amResponse = Common::errorResponse($ssMessage);
+                } else if (($model1 = Users::findOne(['email' => $requestParam['email'], 'password' => md5($requestParam['password']), 'status' => "0"])) !== null) {
+                    $ssMessage = ' User has been deactivated. Please contact admin.';
+                    $amResponse = Common::errorResponse($ssMessage);
+                } else if (($model2 = Users::findOne(['email' => $requestParam['email'], 'password' => md5($requestParam['password']), 'is_code_verified' => "0"])) !== null) {
+                    $ssMessage = ' Your Email is not verified.Please check your inbox to verify email';
+                    $amResponse = Common::errorResponse($ssMessage);
+                } else {
+                    if (($device_model = DeviceDetails::findOne(['type' => "1", 'user_id' => $model->id])) === null) {
+                        $device_model = new DeviceDetails();
+                    }
+
+                    $device_model->setAttributes($amData['request_param']);
+                    $device_model->device_tocken = $requestParam['device_id'];
+                    $device_model->type = "1";
+                    $device_model->user_id = $model->id;
+                    //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
+                    $device_model->save(false);
+                    $ssAuthToken = Common::generateToken($model->id);
+                    $model->auth_token = $ssAuthToken;
+                    $model->save(false);
+
+                    $ssMessage = 'successfully login.';
+                    $amReponseParam['email'] = $model->email;
+                    $amReponseParam['user_id'] = $model->id;
+                    $amReponseParam['role'] = $model->role_id;
+                    $amReponseParam['user_name'] = $model->user_name;
+                    $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
+                    $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                    $amReponseParam['device_token'] = $device_model->device_tocken;
+                    $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
+                    $amReponseParam['auth_token'] = $ssAuthToken;
+
+                    $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
+                }
             } else {
+                $ssMessage = 'Invalid email OR password.';
+                $amResponse = Common::errorResponse($ssMessage);
+            }
+        } else {
+            $amRequiredParams = array('email', 'device_id', 'login_type', 'photo', 'user_name');
+            $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+            // If any getting error in request paramter then set error message.
+            if (!empty($amParamsResult['error'])) {
+                $amResponse = Common::errorResponse($amParamsResult['error']);
+                Common::encodeResponseJSON($amResponse);
+            }
+            if (($model = Users::findOne(['email' => $requestParam['email']])) !== null) {
+                if ($model->login_type == $requestParam['login_type']) {
+                    if (($modell = Users::findOne(['email' => $requestParam['email'], 'role_id' => [Yii::$app->params['userroles']['super_admin'], Yii::$app->params['userroles']['admin']]])) !== null) {
+                        $ssMessage = ' You are not authorize to login.';
+                        $amResponse = Common::errorResponse($ssMessage);
+                    } else if (($model1 = Users::findOne(['email' => $requestParam['email'], 'status' => "0"])) !== null) {
+                        $ssMessage = ' User has been deactivated. Please contact admin.';
+                        $amResponse = Common::errorResponse($ssMessage);
+                    } else {
+                        if (($device_model = DeviceDetails::findOne(['type' => "1", 'user_id' => $model->id])) === null) {
+                            $device_model = new DeviceDetails();
+                        }
+
+                        $device_model->setAttributes($amData['request_param']);
+                        $device_model->device_tocken = $requestParam['device_id'];
+                        $device_model->type = "1";
+                        $device_model->user_id = $model->id;
+                        //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
+                        $device_model->save(false);
+                        $ssAuthToken = Common::generateToken($model->id);
+                        $model->auth_token = $ssAuthToken;
+                        $model->save(false);
+
+                        $ssMessage = 'successfully login.';
+                        $amReponseParam['email'] = $model->email;
+                        $amReponseParam['user_id'] = $model->id;
+                        $amReponseParam['role'] = $model->role_id;
+                        $amReponseParam['user_name'] = $model->user_name;
+                        $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
+                        $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                        $amReponseParam['device_token'] = $device_model->device_tocken;
+                        $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
+                        $amReponseParam['auth_token'] = $ssAuthToken;
+                        $amReponseParam['login_type'] = $model->login_type;
+
+                        $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
+                    }
+                } else {
+                    $model->login_type = $requestParam['login_type'];
+                    $model->photo = $requestParam['photo'];
+                    $model->user_name = $requestParam['user_name'];
+                    $ssAuthToken = Common::generateToken($model->id);
+                    $model->auth_token = $ssAuthToken;
+                    $model->save(false);
+                    if (($device_model = DeviceDetails::findOne(['type' => "1", 'user_id' => $model->id])) === null) {
+                        $device_model = new DeviceDetails();
+                    }
+                    $device_model->setAttributes($amData['request_param']);
+                    $device_model->device_tocken = $requestParam['device_id'];
+                    $device_model->type = "1";
+                    $device_model->user_id = $model->id;
+                    //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
+                    $device_model->save(false);
+                    $ssMessage = 'successfully login.';
+                    $amReponseParam['user_id'] = $model->id;
+                    $amReponseParam['role'] = $model->role_id;
+                    $amReponseParam['user_name'] = $model->user_name;
+                    $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
+                    $amReponseParam['photo'] = !empty($model->photo) ? $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                    $amReponseParam['device_token'] = $device_model->device_tocken;
+                    $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
+                    $amReponseParam['auth_token'] = $ssAuthToken;
+                    $amReponseParam['login_type'] = $model->login_type;
+                    $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
+
+                }
+            } else {
+                $model = new Users();
+                $model->email = $requestParam['email'];
+                $model->login_type = $requestParam['login_type'];
+                $ssAuthToken = Common::generateToken($model->id);
+                $model->auth_token = $ssAuthToken;
+                $model->user_name = $requestParam['user_name'];
+                $model->photo = $requestParam['photo'];
+                $model->is_code_verified = 1;
+                $model->save(false);
                 if (($device_model = DeviceDetails::findOne(['type' => "1", 'user_id' => $model->id])) === null) {
                     $device_model = new DeviceDetails();
                 }
-
                 $device_model->setAttributes($amData['request_param']);
                 $device_model->device_tocken = $requestParam['device_id'];
                 $device_model->type = "1";
                 $device_model->user_id = $model->id;
                 //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
                 $device_model->save(false);
-                $ssAuthToken = Common::generateToken($model->id);
-                $model->auth_token = $ssAuthToken;
-                $model->save(false);
-
                 $ssMessage = 'successfully login.';
-                $amReponseParam['user_email'] = $model->email;
                 $amReponseParam['user_id'] = $model->id;
-                $amReponseParam['first_name'] = $model->first_name;
-                $amReponseParam['last_name'] = $model->last_name;
-                $amReponseParam['address'] = !empty($model->address) ? $model->address : "";
-                $amReponseParam['contact_no'] = !empty($model->contact_no) ? $model->contact_no : "";
+                $amReponseParam['role'] = $model->role_id;
+                $amReponseParam['user_name'] = $model->user_name;
+                $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
+                $amReponseParam['photo'] = !empty($model->photo) ? $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                 $amReponseParam['device_token'] = $device_model->device_tocken;
+                $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                 $amReponseParam['auth_token'] = $ssAuthToken;
-
+                $amReponseParam['login_type'] = $model->login_type;
                 $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
             }
-        } else {
-            $ssMessage = 'Invalid email OR password.';
-            $amResponse = Common::errorResponse($ssMessage);
         }
 
         // FOR ENCODE RESPONSE INTO JSON //
@@ -150,9 +267,6 @@ class UsersController extends \yii\base\Controller
                 }
             }
         }
-
-        $SnRandomNumber = rand(1111, 9999);
-        $Textmessage = "Your verification code is : " . $SnRandomNumber;
         // Common::sendSms( $Textmessage, "$requestParam[phone]" );
         // Database field
         $model->user_name = $requestParam['user_name'];
@@ -160,11 +274,13 @@ class UsersController extends \yii\base\Controller
         $model->password = md5($requestParam['password']);
         /* $model->address_line_1 = !empty($requestParam['address_line_1']) ? $requestParam['address_line_1'] : "";*/
         $model->phone = !empty($requestParam['phone']) ? Common::clean_special_characters($requestParam['phone']) : "";
-        $model->verification_code = $SnRandomNumber;
         $model->role_id = $requestParam['role'];
         $model->status = Yii::$app->params['user_status_value']['active'];
         $ssAuthToken = Common::generateToken($model->id);
         $model->auth_token = $ssAuthToken;
+        $model->generateAuthKey();
+        Yii::$app->urlManager->createUrl(['site/email-verify', 'verify' => base64_encode($model->verification_code), 'e' => base64_encode($model->email)]);
+        $email_verify_link = Yii::$app->params['root_url'] . '/site/email-verify?verify=' . base64_encode($model->verification_code) . '&e=' . base64_encode($model->email);
         if (isset($requestFileparam['photo']['name'])) {
 
             $model->photo = UploadedFile::getInstanceByName('photo');
@@ -198,7 +314,7 @@ class UsersController extends \yii\base\Controller
                 if ($emailformatemodel) {
 
                     //create template file
-                    $AreplaceString = array('{password}' => $requestParam['password'], '{username}' => $model->user_name, '{email}' => $model->email);
+                    $AreplaceString = array('{password}' => $requestParam['password'], '{username}' => $model->user_name, '{email}' => $model->email, '{email_verify_link}' => $email_verify_link);
 
                     $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
                     $ssSubject = $emailformatemodel->subject;
@@ -214,7 +330,6 @@ class UsersController extends \yii\base\Controller
             $amReponseParam['role'] = $model->role_id;
             $amReponseParam['user_name'] = $model->user_name;
             $amReponseParam['phone'] = $model->phone;
-            $amReponseParam['verification_code'] = $model->verification_code;
             $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
             $amReponseParam['device_token'] = $device_model->device_tocken;
             $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";

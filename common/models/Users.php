@@ -43,7 +43,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function rules()
     {
         return [
-            [['role_id', 'badge_count', 'status', 'restaurant_id', 'phone'], 'integer'],
+            [['role_id', 'badge_count', 'status', 'restaurant_id', 'phone', 'login_type'], 'integer'],
             [['verification_code', 'password_reset_token', 'auth_token'], 'required'],
             [['is_code_verified', 'password_reset_token'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
@@ -74,6 +74,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'updated_at' => 'Updated At',
             'restaurant_id' => 'Restaurant ID',
             'phone' => 'Contact No',
+            'login_type' => 'Login Type',
         ];
     }
 
