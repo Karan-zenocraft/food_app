@@ -33,6 +33,15 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return 'users';
     }
+    public function beforeSave($insert)
+    {
+        if ($this->isNewRecord) {
+            $this->setAttribute('created_at', date('Y-m-d H:i:s'));
+        }
+        $this->setAttribute('updated_at', date('Y-m-d H:i:s'));
+
+        return parent::beforeSave($insert);
+    }
 
     /**
      * {@inheritdoc}
@@ -43,12 +52,16 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function rules()
     {
         return [
-            [['role_id', 'badge_count', 'status', 'restaurant_id', 'phone', 'login_type'], 'integer'],
-            [['verification_code', 'password_reset_token', 'auth_token'], 'required'],
-            [['is_code_verified', 'password_reset_token'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
-            [['user_name', 'email', 'password', 'photo', 'verification_code', 'auth_token'], 'string', 'max' => 255],
-            [['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRoles::className(), 'targetAttribute' => ['role_id' => 'id']],
+            // [['role_id', 'status', 'restaurant_id', 'phone', 'login_type'], 'integer'],
+            [['phone'], 'integer'],
+            [['role_id', 'user_name', 'email', 'status', 'password'], 'required'],
+            [['email'], 'email'],
+            ['user_name', 'validateUserName'],
+            ['email', 'validateEmail'],
+            [['created_at', 'updated_at', 'is_code_verified', 'password_reset_token', 'badge_count', 'auth_token', 'verification_code'], 'safe'],
+            [['photo'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
+            [['user_name', 'email', 'password'], 'string', 'max' => 255],
+            //[['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRoles::className(), 'targetAttribute' => ['role_id' => 'id']],
         ];
     }
 
@@ -59,7 +72,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return [
             'id' => 'ID',
-            'role_id' => 'Role ID',
+            'role_id' => 'Role',
             'user_name' => 'User Name',
             'email' => 'Email',
             'password' => 'Password',
@@ -77,13 +90,29 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'login_type' => 'Login Type',
         ];
     }
+    public function validateEmail()
+    {
+        $ASvalidateemail = Users::find()->where('email = "' . $this->email . '" and id != "' . $this->id . '"')->all();
+        if (!empty($ASvalidateemail)) {
+            $this->addError('email', 'This email is already registered.');
+            return true;
+        }
+    }
+    public function validateUserName()
+    {
+        $validateName = Users::find()->where('user_name = "' . $this->user_name . '" and id != "' . $this->id . '"')->all();
+        if (!empty($validateName)) {
+            $this->addError('user_name', 'This user name is already registered.');
+            return true;
+        }
+    }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getRole()
     {
-        return $this->hasOne(UserRole::className(), ['id' => 'role_id']);
+        return $this->hasOne(UserRoles::className(), ['id' => 'role_id']);
     }
 
     /**

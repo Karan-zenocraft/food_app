@@ -570,3 +570,9 @@ table.table_class tbody {  }
 .restaurants-form input, textarea, .uneditable-input {
     width: 91%;
 }
+.form-control{
+    height: 32px !important;
+}
+#userssearch-status{
+    width:100px !important;
+}

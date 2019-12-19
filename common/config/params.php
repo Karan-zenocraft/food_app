@@ -29,4 +29,6 @@ return [
     'bsDependencyEnabled' => false,
     'upload_path' => UPLOAD_PATH,
     'upload_user_image' => UPLOAD_PATH . "profile_pictures" . DS,
+    'super_admin_role_id' => '1',
+    'administrator_role_id' => '2',
 ];

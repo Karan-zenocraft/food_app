@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="span3">
             <div class="chart" data-percent="<?=Users::find()->count();?>"><?=Users::find()->count() . "%";?></div>
             <div class="chart-bottom-heading">
-                <span class="label label-info">Menu Categories</span>
+                <span class="label label-info">Users</span>
             </div>
         </div>
     </div>
