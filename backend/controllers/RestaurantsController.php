@@ -66,8 +66,19 @@ class RestaurantsController extends AdminCoreController
     {
         $model = new Restaurants();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $postdata = Yii::$app->request->post();
+            $model->restaurant_type = implode(",", $postdata['Restaurants']['restaurant_type']);
+            $file = \yii\web\UploadedFile::getInstance($model, 'photo');
+            if (!empty($file)) {
+                $file_name = $file->basename . "_" . uniqid() . "." . $file->extension;
+                //p(trim($file_name));
+                $file_filter = str_replace(" ", "", $file_name);
+                $model->photo = $file_filter;
+                $file->saveAs(Yii::getAlias('@root') . '/uploads/restaurants/' . $file_filter);
+            }
+            $model->save(false);
+            return $this->redirect(['index']);
         }
 
         return $this->render('create', [
@@ -85,13 +96,30 @@ class RestaurantsController extends AdminCoreController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        $old_image = $model->photo;
+        $restaurantTypes = explode(",", $model->restaurant_type);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $postdata = Yii::$app->request->post();
+            $model->restaurant_type = implode(",", $postdata['Restaurants']['restaurant_type']);
+            if (!empty($file)) {
+                $delete = $model->oldAttributes['photo'];
+                $file_name = $file->basename . "_" . uniqid() . "." . $file->extension;
+                $file_filter = str_replace(" ", "", $file_name);
+                if (!empty($old_image) && file_exists(Yii::getAlias('@root') . '/uploads/' . $old_image)) {
+                    unlink(Yii::getAlias('@root') . '/uploads/restaurants/' . $old_image);
+                }
+                $file->saveAs(Yii::getAlias('@root') . '/uploads/restaurants/' . $file_filter, false);
+                $model->photo = $file_filter;
+            } else {
+                $model->photo = $old_image;
+            }
+            $model->save(false);
+            return $this->redirect(['index']);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'restaurantTypes' => $restaurantTypes,
         ]);
     }
 

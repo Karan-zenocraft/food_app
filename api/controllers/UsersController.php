@@ -131,7 +131,7 @@ class UsersController extends \yii\base\Controller
                         $amReponseParam['role'] = $model->role_id;
                         $amReponseParam['user_name'] = $model->user_name;
                         $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
-                        $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                        $amReponseParam['photo'] = !empty($model->photo) ? $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                         $amReponseParam['device_token'] = $device_model->device_tocken;
                         $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                         $amReponseParam['auth_token'] = $ssAuthToken;
@@ -142,6 +142,7 @@ class UsersController extends \yii\base\Controller
                 } else {
                     $model->login_type = $requestParam['login_type'];
                     $model->photo = $requestParam['photo'];
+                    $model->role_id = Yii::$app->params['userroles']['customer'];
                     $model->user_name = $requestParam['user_name'];
                     $ssAuthToken = Common::generateToken($model->id);
                     $model->auth_token = $ssAuthToken;
@@ -156,6 +157,7 @@ class UsersController extends \yii\base\Controller
                     //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
                     $device_model->save(false);
                     $ssMessage = 'successfully login.';
+                    $amReponseParam['email'] = $model->email;
                     $amReponseParam['user_id'] = $model->id;
                     $amReponseParam['role'] = $model->role_id;
                     $amReponseParam['user_name'] = $model->user_name;
@@ -174,6 +176,7 @@ class UsersController extends \yii\base\Controller
                 $model->login_type = $requestParam['login_type'];
                 $ssAuthToken = Common::generateToken($model->id);
                 $model->auth_token = $ssAuthToken;
+                $model->role_id = Yii::$app->params['userroles']['customer'];
                 $model->user_name = $requestParam['user_name'];
                 $model->photo = $requestParam['photo'];
                 $model->is_code_verified = 1;
@@ -189,6 +192,7 @@ class UsersController extends \yii\base\Controller
                 $device_model->save(false);
                 $ssMessage = 'successfully login.';
                 $amReponseParam['user_id'] = $model->id;
+                $amReponseParam['email'] = $model->email;
                 $amReponseParam['role'] = $model->role_id;
                 $amReponseParam['user_name'] = $model->user_name;
                 $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
@@ -245,6 +249,7 @@ class UsersController extends \yii\base\Controller
                 Common::encodeResponseJSON($amResponse);
             }
             $model = new Users();
+            $model->login_type = 1;
         } else {
             $snUserId = $requestParam['user_id'];
             $model = Users::findOne(["id" => $snUserId]);
@@ -271,6 +276,7 @@ class UsersController extends \yii\base\Controller
         // Database field
         $model->user_name = $requestParam['user_name'];
         $model->email = $requestParam['email'];
+        $amReponseParam['login_type'] = $model->login_type;
         $model->password = md5($requestParam['password']);
         /* $model->address_line_1 = !empty($requestParam['address_line_1']) ? $requestParam['address_line_1'] : "";*/
         $model->phone = !empty($requestParam['phone']) ? Common::clean_special_characters($requestParam['phone']) : "";

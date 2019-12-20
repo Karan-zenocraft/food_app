@@ -28,6 +28,7 @@ use yii\widgets\ActiveForm;
  <div class="span3">
     <?php
 echo $form->field($model, 'restaurant_type')->widget(Select2::classname(), [
+    'value' => ['2' => 'american', '3' => 'asian', '4' => 'belgian'],
     'data' => $restaurant_types,
     'name' => 'restaurant_type',
     'options' => ['placeholder' => 'Choose Type', 'multiple' => true],

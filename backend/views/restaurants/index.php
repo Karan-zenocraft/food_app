@@ -90,13 +90,13 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
         //'city',
         //'state',
         [
-            'attribute' => 'country',
+            'attribute' => 'address',
             //  'filter' => Yii::$app->params['status'],
             'filterOptions' => ["style" => "width:10%;text-align:center;"],
             'headerOptions' => ["style" => "width:10%;text-align:center;"],
             'contentOptions' => ["style" => "width:10%;text-align:center;"],
             'value' => function ($data) {
-                return $data->country;
+                return $data->address;
             },
         ],
         //'pincode',
@@ -124,20 +124,20 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                 return Yii::$app->params['user_status'][$data->status];
             },
         ],
-        [
-            'attribute' => 'status',
-            'filter' => Yii::$app->params['user_status'],
-            'format' => 'raw',
-            'filterOptions' => ["style" => "width:13%;"],
-            'headerOptions' => ["style" => "width:13%;"],
-            'contentOptions' => ["style" => "width:13%;"],
-            'value' => function ($data) {
-                $url = "#";
-                $status = ($data->status == 1) ? "true" : "false";
-                $class = ($data->status == 1) ? "switch2" : "";
-                return Html::a('<label class="switch"><input type="checkbox" value="' . $status . '" onclick="switchoff_restaurant(' . $data->id . ');" id="' . $data->id . '" class="' . $class . '"><span class="slider round"></span></label>', $url);
-            },
-        ],
+        /*   [
+        'attribute' => 'status',
+        'filter' => Yii::$app->params['user_status'],
+        'format' => 'raw',
+        'filterOptions' => ["style" => "width:13%;"],
+        'headerOptions' => ["style" => "width:13%;"],
+        'contentOptions' => ["style" => "width:13%;"],
+        'value' => function ($data) {
+        $url = "#";
+        $status = ($data->status == 1) ? "true" : "false";
+        $class = ($data->status == 1) ? "switch2" : "";
+        return Html::a('<label class="switch"><input type="checkbox" value="' . $status . '" onclick="switchoff_restaurant(' . $data->id . ');" id="' . $data->id . '" class="' . $class . '"><span class="slider round"></span></label>', $url);
+        },
+        ],*/
 
         //'created_at',
         //'updated_at',

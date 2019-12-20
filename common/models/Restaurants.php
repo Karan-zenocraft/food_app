@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use Yii;
+
 class Restaurants extends \common\models\base\RestaurantsBase
 {
     public function beforeSave($insert)
@@ -19,11 +21,12 @@ class Restaurants extends \common\models\base\RestaurantsBase
     public function rules()
     {
         return [
-            [['name', 'description', 'restaurant_type', 'address', 'lattitude', 'longitude', 'avg_cost_for_two', 'created_by', 'updated_by', 'created_at', 'updated_at', 'email'], 'required'],
-            [['description', 'is_deleted'], 'string'],
+            [['name', 'description', 'restaurant_type', 'address', 'lattitude', 'longitude', 'avg_cost_for_two', 'email'], 'required'],
+            [['description'], 'string'],
+            [['photo'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
             [['lattitude', 'longitude'], 'number'],
-            [['contact_no', 'avg_cost_for_two', 'status', 'created_by', 'updated_by'], 'integer'],
-            [['created_at', 'updated_at', 'status', 'restaurant_type'], 'safe'],
+            [['contact_no', 'avg_cost_for_two', 'status'], 'integer'],
+            [['created_at', 'updated_at', 'status', 'restaurant_type', 'created_by', 'updated_by', 'is_deleted'], 'safe'],
             [['name', 'address', 'website', 'photo', 'email'], 'string', 'max' => 255],
         ];
     }
