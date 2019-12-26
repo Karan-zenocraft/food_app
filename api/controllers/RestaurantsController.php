@@ -43,6 +43,13 @@ class RestaurantsController extends \yii\base\Controller
             $restaurantList = Restaurants::find()->asArray()->all();
             if (!empty($restaurantList)) {
                 $amReponseParam = $restaurantList;
+                array_walk($restaurantList, function ($arr) use (&$amResponseData) {
+                    $ttt = $arr;
+                    $ttt['photo'] = !empty($ttt['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants/" . $ttt['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $ttt['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                    $amResponseData[] = $ttt;
+                    return $amResponseData;
+                });
+                $amReponseParam = $amResponseData;
                 $ssMessage = 'Restaurants List';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 

@@ -576,3 +576,6 @@ table.table_class tbody {  }
 #userssearch-status{
     width:100px !important;
 }
+input{
+    height: 32px !important;
+}

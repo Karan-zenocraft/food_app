@@ -91,6 +91,7 @@ class Security extends Component
      */
     public $passwordHashCost = 13;
 
+
     /**
      * Encrypts data using a password.
      * Derives keys for encryption and authentication from the password using PBKDF2 and a random salt,
@@ -329,7 +330,7 @@ class Security extends Component
      */
     public function pbkdf2($algo, $password, $salt, $iterations, $length = 0)
     {
-        if (function_exists('hash_pbkdf2')) {
+        if (function_exists('hash_pbkdf2') && PHP_VERSION_ID >= 50500) {
             $outputKey = hash_pbkdf2($algo, $password, $salt, $iterations, $length, true);
             if ($outputKey === false) {
                 throw new InvalidArgumentException('Invalid parameters to hash_pbkdf2()');
@@ -471,7 +472,7 @@ class Security extends Component
         // https://bugs.php.net/bug.php?id=71143
         if ($this->_useLibreSSL === null) {
             $this->_useLibreSSL = defined('OPENSSL_VERSION_TEXT')
-            && preg_match('{^LibreSSL (\d\d?)\.(\d\d?)\.(\d\d?)$}', OPENSSL_VERSION_TEXT, $matches)
+                && preg_match('{^LibreSSL (\d\d?)\.(\d\d?)\.(\d\d?)$}', OPENSSL_VERSION_TEXT, $matches)
                 && (10000 * $matches[1]) + (100 * $matches[2]) + $matches[3] >= 20105;
         }
 
@@ -479,10 +480,10 @@ class Security extends Component
         // of using OpenSSL library. LibreSSL is OK everywhere but don't use OpenSSL on non-Windows.
         if (function_exists('openssl_random_pseudo_bytes')
             && ($this->_useLibreSSL
-                || (
-                    DIRECTORY_SEPARATOR !== '/'
-                    && substr_compare(PHP_OS, 'win', 0, 3, true) === 0
-                ))
+            || (
+                DIRECTORY_SEPARATOR !== '/'
+                && substr_compare(PHP_OS, 'win', 0, 3, true) === 0
+            ))
         ) {
             $key = openssl_random_pseudo_bytes($length, $cryptoStrong);
             if ($cryptoStrong === false) {
@@ -570,8 +571,8 @@ class Security extends Component
         if ($length < 1) {
             throw new InvalidArgumentException('First parameter ($length) must be greater than 0');
         }
-        $security = new Security(); // correct
-        $bytes = $security->generateRandomKey($length);
+
+        $bytes = $this->generateRandomKey($length);
         return substr(StringHelper::base64UrlEncode($bytes), 0, $length);
     }
 

@@ -27,6 +27,7 @@ use yii\widgets\ActiveForm;
   <div class="row">
  <div class="span3">
     <?php
+$model->restaurant_type = explode(",", $model->restaurant_type);
 echo $form->field($model, 'restaurant_type')->widget(Select2::classname(), [
     'value' => ['2' => 'american', '3' => 'asian', '4' => 'belgian'],
     'data' => $restaurant_types,
@@ -37,7 +38,7 @@ echo $form->field($model, 'restaurant_type')->widget(Select2::classname(), [
         'tokenSeparators' => [',', ' '],
         'maximumInputLength' => 10,
     ],
-]); ?>
+]);?>
 
  </div>
 </div>

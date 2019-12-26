@@ -5,6 +5,7 @@ namespace api\controllers;
 use common\components\Common;
 use common\models\DeviceDetails;
 use common\models\EmailFormat;
+use common\models\UserAddress;
 use common\models\Users;
 use Yii;
 
@@ -598,21 +599,21 @@ class UsersController extends \yii\base\Controller
         Common::encodeResponseJSON($amResponse);
     }
     /*
-     * Function : EditProfile()
-     * Description : Edit User Profile
-     * Request Params : university_id,first_name,last_name,email address,contact_no
-     * Response Params : user_id,firstname,email,last_name, email,status,created_at
+     * Function : AddAddress()
+     * Description : Add address
+     * Request Params :user_id,address
+     * Response Params :
      * Author : Rutusha Joshi
      */
 
-    public function actionEditProfile()
+    public function actionAddAddress()
     {
         //Get all request parameter
         $amData = Common::checkRequestType();
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'first_name', 'last_name', 'email', 'address', 'contact_no');
+        $amRequiredParams = array('user_id');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -622,51 +623,118 @@ class UsersController extends \yii\base\Controller
         }
 
         $requestParam = $amData['request_param'];
-
-        //Check User Status//
         Common::matchUserStatus($requestParam['user_id']);
         //VERIFY AUTH TOKEN
         $authToken = Common::get_header('auth_token');
         Common::checkAuthentication($authToken);
-        if (!empty($requestParam['user_id'])) {
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            if (!empty($requestParam['address'])) {
+                $addresses = json_decode($requestParam['address']);
+                foreach ($addresses as $key => $address) {
 
-            if (!empty(Users::find()->where("email = '" . $requestParam['email'] . "' AND id != '" . $requestParam['user_id'] . "'")->one())) {
-                $amResponse = Common::errorResponse("This Email id is already registered.");
-                Common::encodeResponseJSON($amResponse);
-            }
-            if (!empty(Users::find()->where("contact_no = '" . $requestParam['contact_no'] . "' AND id != '" . $requestParam['user_id'] . "'")->one())) {
+                    $amRequiredParamsAdd = array('address', 'area', 'lat', 'long', 'is_default', 'address_type');
+                    $amParamsResult = Common::checkRequestParameterKey((array) $address, $amRequiredParamsAdd);
+                    // If any getting error in request paramter then set error message.
+                    if (!empty($amParamsResult['error'])) {
+                        $amResponse = Common::errorResponse($amParamsResult['error']);
+                        Common::encodeResponseJSON($amResponse);
+                    }
+                    if (!empty($address->id)) {
+                        $addressModel = UserAddress::findOne($address->id);
+                        if (!empty($addressModel)) {
+                            $addressModel->user_id = $requestParam['user_id'];
+                            $addressModel->address = $address->address;
+                            $addressModel->area = $address->area;
+                            $addressModel->lat = $address->lat;
+                            $addressModel->long = $address->long;
+                            $addressModel->is_default = $address->is_default;
+                            $addressModel->address_type = $address->address_type;
+                            $addressModel->save(false);
+                        } else {
+                            $ssMessage = 'Invalid Address id.';
+                            $amResponse = Common::errorResponse($ssMessage);
+                            Common::encodeResponseJSON($amResponse);
+                        }
+                    } else {
+                        $addressModel = new UserAddress();
+                        $addressModel->user_id = $requestParam['user_id'];
+                        $addressModel->address = $address->address;
+                        $addressModel->area = $address->area;
+                        $addressModel->lat = $address->lat;
+                        $addressModel->long = $address->long;
+                        $addressModel->is_default = $address->is_default;
+                        $addressModel->address_type = $address->address_type;
+                        $addressModel->save(false);
+                    }
 
-                $amResponse = Common::errorResponse("Contact Number you entered is already registered by other user.");
-                Common::encodeResponseJSON($amResponse);
-            }
-
-            $snUserId = $requestParam['user_id'];
-            $model = Users::findOne(["id" => $snUserId]);
-            if (!empty($model)) {
-
-                // Database field
-                $model->first_name = $requestParam['first_name'];
-                $model->last_name = $requestParam['last_name'];
-                $model->address = !empty($requestParam['address']) ? $requestParam['address'] : "";
-                $model->email = !empty($requestParam['email']) ? $requestParam['email'] : "";
-                $model->contact_no = !empty($requestParam['contact_no']) ? $requestParam['contact_no'] : '';
-
-                if ($model->save(false)) {
-                    $ssMessage = 'Your profile has been updated successfully.';
-
-                    $amReponseParam['user_email'] = $model->email;
-                    $amReponseParam['user_id'] = $model->id;
-                    $amReponseParam['first_name'] = $model->first_name;
-                    $amReponseParam['last_name'] = $model->last_name;
-                    $amReponseParam['address'] = !empty($model->address) ? $model->address : "";
-                    $amReponseParam['contact_no'] = !empty($model->contact_no) ? $model->contact_no : "";
-                    $amReponseParam['auth_token'] = !empty($model->auth_token) ? $model->auth_token : "";
-                    $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
                 }
+                $response = UserAddress::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
+                $ssMessage = 'Your address has been added successfully.';
+                $amReponseParam = $response;
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             } else {
-                $ssMessage = 'Invalid User.';
+                $response = UserAddress::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
+                $ssMessage = 'Address List';
+                $amReponseParam = $response;
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    /*
+     * Function : DeleteAddress()
+     * Description : Add address
+     * Request Params :user_id,address
+     * Response Params :
+     * Author : Rutusha Joshi
+     */
+
+    public function actionDeleteAddress()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $address = UserAddress::findOne($requestParam['id']);
+            if (!empty($address)) {
+                $address->delete();
+                $response = UserAddress::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
+                $amReponseParam = $response;
+                $ssMessage = 'Your address has been deleted successfully.';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $ssMessage = 'Invalid Address id.';
                 $amResponse = Common::errorResponse($ssMessage);
             }
+
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
         }
         // FOR ENCODE RESPONSE INTO JSON //
         Common::encodeResponseJSON($amResponse);
