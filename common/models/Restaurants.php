@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 class Restaurants extends \common\models\base\RestaurantsBase
 {
@@ -56,5 +57,27 @@ class Restaurants extends \common\models\base\RestaurantsBase
             'updated_at' => 'Updated At',
             'email' => 'Email',
         ];
+    }
+    public static function getRestaurantNamesWithId($restaurant_id)
+    {
+        $restaurantNames = Restaurants::find()->select('id,name')->where("id in (" . $restaurant_id . ")")->asArray()->all();
+        return $restaurantNames;
+    }
+
+    public static function getRestaurantNames($restaurant_id, $flag)
+    {
+        if (!empty($flag) && ($flag == "name")) {
+            $restaurantNames = Restaurants::find()->select('name')->where("id in (" . $restaurant_id . ")")->asArray()->all();
+            $values = array_column($restaurantNames, 'name');
+            return implode(",", $values);
+        } else {
+            $restaurantNames = Restaurants::find()->where("id in (" . $restaurant_id . ")")->asArray()->all();
+            return $restaurantNames;
+        }
+    }
+    public static function RestaurantsDropdown()
+    {
+        $restaurants = ArrayHelper::map(Restaurants::find()->orderBy('name')->asArray()->all(), 'id', 'name');
+        return $restaurants;
     }
 }

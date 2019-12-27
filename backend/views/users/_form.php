@@ -48,7 +48,7 @@ use yii\widgets\ActiveForm;
 </div>
       <div class="row">
 <div class="span3">
-    <img id="image" width="100px" hieght="100px" src="<?php echo Yii::getAlias('@web') . "/../uploads/" . $model->photo; ?>" alt="" />
+    <img id="image" width="100px" hieght="100px" src="<?php echo ($model->login_type == "1") ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : $model->photo; ?>" alt="" />
     </div>
 </div>
     <div class="form-group">

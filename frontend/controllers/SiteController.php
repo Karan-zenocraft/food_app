@@ -21,6 +21,12 @@ use yii\web\Controller;
  */
 class SiteController extends Controller
 {
+    public function beforeAction($action)
+    {
+
+        $this->enableCsrfValidation = false;
+        return parent::beforeAction($action);
+    }
     /**
      * {@inheritdoc}
      */
@@ -198,12 +204,12 @@ class SiteController extends Controller
     {
         try {
             $model = new ResetPasswordForm($token);
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidParamException $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
-            Yii::$app->session->setFlash('success', 'New password saved.');
+            Yii::$app->getSession()->setFlash('success', 'New password was saved.');
 
             return $this->goHome();
         }

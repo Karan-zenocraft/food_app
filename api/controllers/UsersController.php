@@ -501,7 +501,7 @@ class UsersController extends \yii\base\Controller
 
         $ssMessage = '';
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_email');
+        $amRequiredParams = array('email');
 
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
@@ -515,7 +515,7 @@ class UsersController extends \yii\base\Controller
 
         // Check User Status
 
-        if (($omUsers = Users::findOne(['email' => $requestParam['user_email'], 'status' => Yii::$app->params['user_status_value']['active']])) !== null) {
+        if (($omUsers = Users::findOne(['email' => $requestParam['email'], 'status' => Yii::$app->params['user_status_value']['active']])) !== null) {
 
             if (!Users::isPasswordResetTokenValid($omUsers->password_reset_token)) {
                 $token = Users::generatePasswordResetToken();
@@ -524,20 +524,20 @@ class UsersController extends \yii\base\Controller
                     return false;
                 }
             }
-            $resetLink = Yii::$app->params['root_url_live'] . "site/reset-password?token=" . $omUsers->password_reset_token;
+            $resetLink = Yii::$app->params['root_url'] . "/site/reset-password?token=" . $omUsers->password_reset_token;
 
             $emailformatemodel = EmailFormat::findOne(["title" => 'reset_password', "status" => '1']);
             if ($emailformatemodel) {
 
                 //create template file
-                $AreplaceString = array('{resetLink}' => $resetLink, '{username}' => $omUsers->first_name);
+                $AreplaceString = array('{resetLink}' => $resetLink, '{username}' => $omUsers->user_name);
                 $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
 
                 //send email for new generated password
-                $mail = Common::sendMailToUser($omUsers->email, Yii::$app->params['adminEmail'], $emailformatemodel->subject, $body);
+                $mail = Common::sendMail($omUsers->email, Yii::$app->params['adminEmail'], $emailformatemodel->subject, $body);
             }
             if ($mail == 1) {
-                $amReponseParam['user_email'] = $omUsers->email;
+                $amReponseParam['email'] = $omUsers->email;
                 $ssMessage = 'Email has been sent successfully please check your email. ';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             } else {

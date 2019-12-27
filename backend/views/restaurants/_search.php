@@ -1,5 +1,6 @@
 <?php
 
+use common\models\RestaurantType;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -25,7 +26,7 @@ use yii\widgets\ActiveForm;
 
     <div class="span3"><?=$form->field($model, 'description')?></div>
 
-     <div class="span3"><?=$form->field($model, 'restaurant_type')?></div>
+     <div class="span3"><?=$form->field($model, 'restaurant_type')->dropDownList(array("" => "") + RestaurantType::RestaurantTypesDropdown());?></div>
 </div>
 
     <div class="row">

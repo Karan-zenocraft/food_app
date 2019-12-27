@@ -1,8 +1,9 @@
 <?php
 
+use common\models\Restaurants;
 use yii\helpers\Html;
+use yii\jui\DatePicker;
 use yii\widgets\ActiveForm;
-
 /* @var $this yii\web\View */
 /* @var $model common\models\SpecialOffersSearch */
 /* @var $form yii\widgets\ActiveForm */
@@ -17,7 +18,7 @@ use yii\widgets\ActiveForm;
 <div class="row">
 
     <div class="span3">
-    <?=$form->field($model, 'restaurant_id')?>
+    <?=$form->field($model, 'restaurant_id')->dropDownList(array("" => "") + Restaurants::RestaurantsDropdown());?>
     </div>
 <div class="span3">
     <?=$form->field($model, 'discount')?>
@@ -28,10 +29,10 @@ use yii\widgets\ActiveForm;
 </div>
 <div class="row">
 <div class="span3">
-    <?php echo $form->field($model, 'from_date') ?>
+      <?=$form->field($model, 'from_date')->widget(DatePicker::className(), ['dateFormat' => 'yyyy-MM-dd', 'options' => ['class' => 'from_date']/*, 'clientOptions' => ['minDate'=>'0']*/])?>
 </div>
 <div class="span3">
-    <?php echo $form->field($model, 'to_date') ?>
+     <?=$form->field($model, 'to_date')->widget(DatePicker::className(), ['dateFormat' => 'yyyy-MM-dd', 'options' => ['class' => 'to_date']/*, 'clientOptions' => ['minDate'=>'0']*/])?>
 </div>
 </div>
     <?php //echo $form->field($model, 'photo')?>

@@ -101,6 +101,7 @@ class RestaurantsController extends AdminCoreController
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $postdata = Yii::$app->request->post();
             $model->restaurant_type = implode(",", $postdata['Restaurants']['restaurant_type']);
+            $file = \yii\web\UploadedFile::getInstance($model, 'photo');
             if (!empty($file)) {
                 $delete = $model->oldAttributes['photo'];
                 $file_name = $file->basename . "_" . uniqid() . "." . $file->extension;

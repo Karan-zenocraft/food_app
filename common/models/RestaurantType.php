@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use yii\helpers\ArrayHelper;
+
 class RestaurantType extends \common\models\base\RestaurantTypeBase
 {
     public function beforeSave($insert)
@@ -34,5 +36,11 @@ class RestaurantType extends \common\models\base\RestaurantTypeBase
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public static function RestaurantTypesDropdown()
+    {
+        $restaurantsTypes = ArrayHelper::map(RestaurantType::find()->orderBy('type')->asArray()->all(), 'id', 'type');
+        return $restaurantsTypes;
     }
 }

@@ -1,6 +1,12 @@
-<?php
+<style type="text/css">
+img{
+height: 43px !important;
+width: 43px !important;
+}
+</style><?php
 
 use common\components\Common;
+use common\models\Restaurants;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -59,10 +65,29 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
         ['class' => 'yii\grid\SerialColumn'],
 
         // 'id',
-        'restaurant_id',
+        [
+            'attribute' => 'restaurant_id',
+            //'visible'=>( !empty( $_GET['tid'] ) ) ? false : true,
+            'format' => 'raw',
+            'value' => function ($data) {
+                $ssText = Restaurants::getRestaurantNames($data->restaurant_id, $flag = "name");
+                return $ssText;
+            },
+        ],
         'discount',
         'coupan_code',
-        'photo',
+        [
+            'attribute' => 'photo',
+            'format' => 'image',
+            'value' => function ($data) {
+                if (!empty($data->photo)) {
+                    $photo = Yii::$app->params['root_url'] . '/' . "uploads/restaurants_offers/" . $data->photo;
+                } else {
+                    $photo = Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                }
+                return $photo;
+            },
+        ],
         'from_date',
         'to_date',
         //'created_at',

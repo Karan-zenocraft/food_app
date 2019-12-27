@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\UserRoles;
 use Yii;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "users".
@@ -228,7 +229,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function generatePasswordResetToken()
     {
         $user = new \common\models\Users();
-        $user->password_reset_token = Security::generateRandomString() . '_' . time();
+        $user->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
         return $user->password_reset_token;
     }
 

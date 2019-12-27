@@ -2,9 +2,9 @@
 
 namespace common\models;
 
+use common\models\Restaurants;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Restaurants;
 
 /**
  * RestaurantsSearch represents the model behind the search form of `common\models\Restaurants`.

@@ -48,10 +48,15 @@ echo $form->field($model, 'restaurant_id')->widget(Select2::classname(), [
     <?=$form->field($model, 'coupan_code')->textInput(['maxlength' => true])?>
 </div>
 <div class="span3 style_input_width">
-    <?php $model->photo = Yii::$app->params['root_url'] . '/' . "uploads/restaurants_offers/" . $model->photo;?>
+
       <?=$form->field($model, 'photo')->fileInput(['id' => 'photo']);?>
 </div>
 </div>
+  <div class="row">
+    <div class="span3">
+    <img id="image" width="100px" hieght="100px" src="<?php echo Yii::$app->params['root_url'] . '/' . "uploads/restaurants_offers/" . $model->photo; ?>" alt="" />
+    </div>
+    </div>
 <div class="row">
     <div class="span3">
       <?=$form->field($model, 'from_date')->widget(DatePicker::className(), ['dateFormat' => 'yyyy-MM-dd', 'clientOptions' => ['minDate' => '0'], 'options' => ['class' => 'from_date']/*, 'clientOptions' => ['minDate'=>'0']*/])?>
@@ -70,4 +75,24 @@ echo $form->field($model, 'restaurant_id')->widget(Select2::classname(), [
 </div>
     </div>
 </div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    $("#photo").change(function() {
+          readURL(this);
+        });
+});
+    function readURL(input) {
+
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      $('#image').attr('src', e.target.result);
+    }
+
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
 

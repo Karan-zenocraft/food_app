@@ -1,6 +1,7 @@
 <?php
 
 use common\components\Common;
+use common\models\Restaurants;
 use yii\grid\GridView;
 use yii\helpers\Html;
 
@@ -76,7 +77,15 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                 return Html::a($ssText, ['view', 'id' => $data->id], ['class' => 'colorbox_popup', 'onclick' => 'javascript:openColorBox(700,650);']);
             },
         ],
-        'restaurant_type:ntext',
+        [
+            'attribute' => 'restaurant_type',
+            //'visible'=>( !empty( $_GET['tid'] ) ) ? false : true,
+            'format' => 'raw',
+            'value' => function ($data) {
+                $ssText = Restaurants::getRestaurantTypes($data->restaurant_type, $flag = "type");
+                return $ssText;
+            },
+        ],
         [
             'attribute' => 'address',
             //  'filter' => Yii::$app->params['status'],
@@ -113,6 +122,18 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
             },
         ],
         'contact_no',
+        [
+            'attribute' => 'photo',
+            'format' => 'image',
+            'value' => function ($data) {
+                if (!empty($data->photo)) {
+                    $photo = Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $data->photo;
+                } else {
+                    $photo = Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                }
+                return $photo;
+            },
+        ],
         //'email:email',
         [
             'attribute' => 'status',

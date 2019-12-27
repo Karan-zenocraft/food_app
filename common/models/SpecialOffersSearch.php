@@ -2,9 +2,9 @@
 
 namespace common\models;
 
+use common\models\SpecialOffers;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\SpecialOffers;
 
 /**
  * SpecialOffersSearch represents the model behind the search form of `common\models\SpecialOffers`.
@@ -59,7 +59,7 @@ class SpecialOffersSearch extends SpecialOffers
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'restaurant_id' => $this->restaurant_id,
+            // 'restaurant_id' => $this->restaurant_id,
             'discount' => $this->discount,
             'from_date' => $this->from_date,
             'to_date' => $this->to_date,
@@ -68,7 +68,8 @@ class SpecialOffersSearch extends SpecialOffers
         ]);
 
         $query->andFilterWhere(['like', 'coupan_code', $this->coupan_code])
-            ->andFilterWhere(['like', 'photo', $this->photo]);
+        //->andFilterWhere(['like', 'photo', $this->photo]);
+            ->andFilterWhere(['like', 'restaurant_id', $this->restaurant_id]);
 
         return $dataProvider;
     }

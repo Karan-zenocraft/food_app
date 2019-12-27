@@ -5,6 +5,7 @@ namespace common\models\base;
 use common\models\RestaurantGallery;
 use common\models\RestaurantMenu;
 use common\models\RestaurantsQuery;
+use common\models\RestaurantType;
 use common\models\RestaurantWorkingHours;
 use Yii;
 
@@ -108,6 +109,17 @@ class RestaurantsBase extends \yii\db\ActiveRecord
     public function getRestaurantWorkingHours()
     {
         return $this->hasMany(RestaurantWorkingHours::className(), ['restaurant_id' => 'id']);
+    }
+    public static function getRestaurantTypes($restaurant_id, $flag)
+    {
+        if (!empty($flag) && ($flag == "type")) {
+            $restaurantTypes = RestaurantType::find()->select('type')->where("id in (" . $restaurant_id . ")")->asArray()->all();
+            $values = array_column($restaurantTypes, 'type');
+            return implode(",", $values);
+        } else {
+            $restaurantTypes = RestaurantType::find()->where("id in (" . $restaurant_id . ")")->asArray()->all();
+            return $restaurantTypes;
+        }
     }
 
     /**
