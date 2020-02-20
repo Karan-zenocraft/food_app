@@ -631,26 +631,24 @@ class UsersController extends \yii\base\Controller
         $model = Users::findOne(["id" => $snUserId]);
         if (!empty($model)) {
             if (!empty($requestParam['address'])) {
-                $addresses = json_decode($requestParam['address']);
+                $addresses = $requestParam['address'];
                 foreach ($addresses as $key => $address) {
-
                     $amRequiredParamsAdd = array('address', 'area', 'lat', 'long', 'is_default', 'address_type');
-                    $amParamsResult = Common::checkRequestParameterKey((array) $address, $amRequiredParamsAdd);
+                    $amParamsResult = Common::checkRequestParameterKey($address, $amRequiredParamsAdd);
                     // If any getting error in request paramter then set error message.
                     if (!empty($amParamsResult['error'])) {
                         $amResponse = Common::errorResponse($amParamsResult['error']);
                         Common::encodeResponseJSON($amResponse);
                     }
-                    if (!empty($address->id)) {
-                        $addressModel = UserAddress::findOne($address->id);
+                    if (isset($address['id']) && !empty($address['id'])) {
+                        $addressModel = UserAddress::findOne($address['id']);
                         if (!empty($addressModel)) {
                             $addressModel->user_id = $requestParam['user_id'];
-                            $addressModel->address = $address->address;
-                            $addressModel->area = $address->area;
-                            $addressModel->lat = $address->lat;
-                            $addressModel->long = $address->long;
-                            $addressModel->is_default = $address->is_default;
-                            $addressModel->address_type = $address->address_type;
+                            $addressModel->address = $address['address'];
+                            $addressModel->area = $address['area'];
+                            $addressModel->lat = $address['lat'];
+                            $addressModel->long = $address['long'];
+                            $addressModel->address_type = $address['address_type'];
                             $addressModel->save(false);
                         } else {
                             $ssMessage = 'Invalid Address id.';
@@ -660,12 +658,12 @@ class UsersController extends \yii\base\Controller
                     } else {
                         $addressModel = new UserAddress();
                         $addressModel->user_id = $requestParam['user_id'];
-                        $addressModel->address = $address->address;
-                        $addressModel->area = $address->area;
-                        $addressModel->lat = $address->lat;
-                        $addressModel->long = $address->long;
-                        $addressModel->is_default = $address->is_default;
-                        $addressModel->address_type = $address->address_type;
+                        $addressModel->address = $address['address'];
+                        $addressModel->area = $address['area'];
+                        $addressModel->lat = $address['lat'];
+                        $addressModel->long = $address['long'];
+                        $addressModel->is_default = $address['is_default'];
+                        $addressModel->address_type = $address['address_type'];
                         $addressModel->save(false);
                     }
 
@@ -679,6 +677,60 @@ class UsersController extends \yii\base\Controller
                 $ssMessage = 'Address List';
                 $amReponseParam = $response;
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    /*
+     * Function : GetUserDetails()
+     * Description : Get User Details
+     * Request Params : user_id
+     * Response Params : user's details
+     * Author : Rutusha Joshi
+     */
+
+    public function actionSetDefaultAddress()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'address_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            // Device Registration
+            $addressModel = UserAddress::find()->where(['id' => $requestParam['address_id'], "user_id" => $requestParam['user_id']])->one();
+            if (!empty($addressModel)) {
+                $useraddresses = UserAddress::updateAll(['is_default' => '0'], ['user_id' => $requestParam['user_id']]);
+                $addressModel->is_default = 1;
+                $addressModel->save(false);
+                $ssMessage = 'Default address successfully updated.';
+                $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
+
+            } else {
+                $ssMessage = 'Invalid address id.';
+                $amResponse = Common::errorResponse($ssMessage);
             }
         } else {
             $ssMessage = 'Invalid User.';

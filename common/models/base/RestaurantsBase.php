@@ -2,8 +2,9 @@
 
 namespace common\models\base;
 
-use common\models\RestaurantGallery;
+use common\models\MenuCategories;
 use common\models\RestaurantMenu;
+use common\models\RestaurantsGallery;
 use common\models\RestaurantsQuery;
 use common\models\RestaurantType;
 use common\models\RestaurantWorkingHours;
@@ -31,6 +32,7 @@ use Yii;
  * @property string $updated_at
  * @property string $email
  *
+ * @property MenuCategories[] $menuCategories
  * @property RestaurantGallery[] $restaurantGalleries
  * @property RestaurantMenu[] $restaurantMenus
  * @property RestaurantWorkingHours[] $restaurantWorkingHours
@@ -90,9 +92,17 @@ class RestaurantsBase extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getMenuCategories()
+    {
+        return $this->hasMany(MenuCategories::className(), ['restaurant_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getRestaurantGalleries()
     {
-        return $this->hasMany(RestaurantGallery::className(), ['restaurant_id' => 'id']);
+        return $this->hasMany(RestaurantsGallery::className(), ['restaurant_id' => 'id']);
     }
 
     /**
@@ -121,11 +131,6 @@ class RestaurantsBase extends \yii\db\ActiveRecord
             return $restaurantTypes;
         }
     }
-
-    /**
-     * @inheritdoc
-     * @return RestaurantsQuery the active query used by this AR class.
-     */
     public static function find()
     {
         return new RestaurantsQuery(get_called_class());

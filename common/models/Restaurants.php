@@ -80,4 +80,5 @@ class Restaurants extends \common\models\base\RestaurantsBase
         $restaurants = ArrayHelper::map(Restaurants::find()->orderBy('name')->asArray()->all(), 'id', 'name');
         return $restaurants;
     }
+
 }

@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\SpecialOffers */
+/* @var $model common\models\RestaurantsGallery */
 
 $this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Special Offers', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Restaurants Galleries', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="special-offers-view">
+<div class="restaurants-gallery-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -31,11 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'id',
             'restaurant_id',
-            'discount',
-            'coupan_code',
-            'photo',
-            'from_date',
-            'to_date',
+            'image_title',
+            'image_description:ntext',
+            'image_name',
+            'status',
+            'created_by',
+            'updated_by',
             'created_at',
             'updated_at',
         ],

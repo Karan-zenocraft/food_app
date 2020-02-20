@@ -24,4 +24,11 @@ class SpecialOffers extends \common\models\base\SpecialOffersBase
             //[['restaurant_id'], 'exist', 'skipOnError' => true, 'targetClass' => Restaurants::className(), 'targetAttribute' => ['restaurant_id' => 'id']],
         ];
     }
+
+    public static function getSpecialOffers($restaurant_id)
+    {
+        $date = date("Y-m-d");
+        $offers = SpecialOffers::find()->where("from_date <= '" . $date . "' AND to_date >= '" . $date . "' AND find_in_set('" . $restaurant_id . "',restaurant_id) <> 0")->asArray()->all();
+        return $offers;
+    }
 }

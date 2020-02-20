@@ -98,29 +98,19 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
         ],
         //'city',
         //'state',
-        [
-            'attribute' => 'address',
-            //  'filter' => Yii::$app->params['status'],
-            'filterOptions' => ["style" => "width:10%;text-align:center;"],
-            'headerOptions' => ["style" => "width:10%;text-align:center;"],
-            'contentOptions' => ["style" => "width:10%;text-align:center;"],
-            'value' => function ($data) {
-                return $data->address;
-            },
-        ],
         //'pincode',
         //'lattitude',
         'avg_cost_for_two',
-        [
-            'attribute' => 'website',
-            //  'filter' => Yii::$app->params['status'],
-            'filterOptions' => ["style" => "width:10%;text-align:center;"],
-            'headerOptions' => ["style" => "width:10%;text-align:center;"],
-            'contentOptions' => ["style" => "width:10%;text-align:center;"],
-            'value' => function ($data) {
-                return $data->website;
-            },
-        ],
+        /*      [
+        'attribute' => 'website',
+        //  'filter' => Yii::$app->params['status'],
+        'filterOptions' => ["style" => "width:10%;text-align:center;"],
+        'headerOptions' => ["style" => "width:10%;text-align:center;"],
+        'contentOptions' => ["style" => "width:10%;text-align:center;"],
+        'value' => function ($data) {
+        return $data->website;
+        },
+        ],*/
         'contact_no',
         [
             'attribute' => 'photo',
@@ -168,11 +158,25 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
             'class' => 'yii\grid\ActionColumn',
             'headerOptions' => ["style" => "width:40%;"],
             'contentOptions' => ["style" => "width:40%;"],
-            'template' => '{update}{delete}',
+            'template' => '{update}{manage_categories}{manage_gallery}{delete}',
             'buttons' => [
                 'update' => function ($url, $model) {
                     $flag = 1;
                     return Common::template_update_button($url, $model, $flag);
+                },
+                'manage_gallery' => function ($url, $model) {
+                    $title = "Manage Gallery";
+                    $flag = 2;
+                    $url = Yii::$app->urlManager->createUrl(['restaurants-gallery/index', 'rid' => $model->id]);
+                    return Common::template_view_gallery_button($url, $model, $title, $flag);
+
+                },
+                'manage_categories' => function ($url, $model) {
+                    $title = "manage Restaurant's Categories";
+                    $flag = 3;
+                    $url = Yii::$app->urlManager->createUrl(['menu-categories/index', 'rid' => $model->id]);
+                    return Common::template_view_gallery_button($url, $model, $title, $flag);
+
                 },
                 'delete' => function ($url, $model) {
                     $flag = 1;
