@@ -725,8 +725,9 @@ class UsersController extends \yii\base\Controller
                 $useraddresses = UserAddress::updateAll(['is_default' => '0'], ['user_id' => $requestParam['user_id']]);
                 $addressModel->is_default = 1;
                 $addressModel->save(false);
+                $amReponseParam = UserAddress::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
                 $ssMessage = 'Default address successfully updated.';
-                $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
             } else {
                 $ssMessage = 'Invalid address id.';
