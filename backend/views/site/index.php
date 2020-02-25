@@ -1,4 +1,6 @@
 <?php
+use common\models\Restaurants;
+use common\models\SpecialOffers;
 use common\models\Users;
 use yii\helpers\Html;
 /* @var $this yii\web\View */
@@ -19,15 +21,15 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
         <div class="span3">
-            <div class="chart" data-percent="<?=Users::find()->count();?>"><?=Users::find()->count() . "%";?></div>
+            <div class="chart" data-percent="<?=Restaurants::find()->count();?>"><?=Restaurants::find()->count() . "%";?></div>
             <div class="chart-bottom-heading">
-                <span class="label label-info">Users</span>
+                <span class="label label-info">Restaurants</span>
             </div>
         </div>
         <div class="span3">
-            <div class="chart" data-percent="<?=Users::find()->count();?>"><?=Users::find()->count() . "%";?></div>
+            <div class="chart" data-percent="<?=SpecialOffers::find()->count();?>"><?=SpecialOffers::find()->count() . "%";?></div>
             <div class="chart-bottom-heading">
-                <span class="label label-info">Users</span>
+                <span class="label label-info">SpecialOffers</span>
             </div>
         </div>
         <div class="span3">
