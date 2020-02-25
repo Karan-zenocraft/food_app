@@ -5,8 +5,10 @@ namespace api\controllers;
 use common\components\Common;
 
 /* USE COMMON MODELS */
+use common\models\Feedbacks;
 use common\models\Restaurants;
 use common\models\SpecialOffers;
+use common\models\UserAddress;
 use common\models\Users;
 use Yii;
 use yii\web\Controller;
@@ -44,11 +46,28 @@ class RestaurantsController extends \yii\base\Controller
             $restaurantList = Restaurants::find()->asArray()->all();
             if (!empty($restaurantList)) {
                 $amReponseParam = $restaurantList;
-                array_walk($restaurantList, function ($arr) use (&$amResponseData) {
+                array_walk($restaurantList, function ($arr) use (&$amResponseData, $requestParam) {
                     $ttt = $arr;
                     $ttt['photo'] = !empty($ttt['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants/" . $ttt['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $ttt['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                     $ttt['restaurant_type'] = Restaurants::getRestaurantTypes($ttt['restaurant_type'], "type");
                     $ttt['specialOffers'] = SpecialOffers::getSpecialOffers($ttt['id']);
+                    $userDefaultAddress = UserAddress::find()->where(['user_id' => $requestParam['user_id'], 'is_default' => "1"])->one();
+                    $lat = $userDefaultAddress['lat'];
+                    $long = $userDefaultAddress['long'];
+                    $distance = Common::distance($ttt['lattitude'], $ttt['longitude'], $lat, $long, "K");
+                    if ($distance > 20) {
+                        $ttt['avg_time'] = "Not available at your location";
+                    } else {
+                        $time = floor(($distance / 20) * 60);
+                        $time2 = $time + 10;
+                        $ttt['avg_time'] = $time . "-" . $time2 . " mins";
+
+                    }
+                    $Feedbacks = Feedbacks::find()->select("AVG(rating) AS rating")->where(["restaurant_id" => $ttt['id']])->asArray()->all();
+
+                    $ttt['feedback_rating'] = !empty($Feedbacks[0]['rating']) ? $Feedbacks[0]['rating'] : "0";
+                    $FeedbackCount = Feedbacks::find()->where(["restaurant_id" => $ttt['id']])->count();
+                    $ttt['feedback_count'] = !empty($FeedbackCount) ? $FeedbackCount : "0";
                     $amResponseData[] = $ttt;
                     return $amResponseData;
                 });
@@ -140,16 +159,26 @@ class RestaurantsController extends \yii\base\Controller
                         return $amResponseDataOffers;
                     });
 
-                    $amReponseParam['specialOffers'] = $amResponseDataOffers;
+                    $amReponseParam[0]['specialOffers'] = $amResponseDataOffers;
                 }
-                /*            array_walk($restaurantList, function ($arr) use (&$amResponseData) {
-                $ttt = $arr;
-                $ttt['photo'] = !empty($ttt['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants/" . $ttt['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $ttt['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
-                $ttt['restaurant_type'] = Restaurants::getRestaurantTypes($ttt['restaurant_type'], "type");
-                $amResponseData[] = $ttt;
-                return $amResponseData;
-                });
-                $amReponseParam = $amResponseData;*/
+                $Feedbacks = Feedbacks::find()->select("AVG(rating) AS rating")->where(["restaurant_id" => $requestParam['restaurant_id']])->asArray()->all();
+
+                $amReponseParam[0]['feedback_rating'] = !empty($Feedbacks[0]['rating']) ? $Feedbacks[0]['rating'] : "0";
+                $FeedbackCount = Feedbacks::find()->where(["restaurant_id" => $requestParam['restaurant_id']])->count();
+                $amReponseParam[0]['feedback_count'] = !empty($FeedbackCount) ? $FeedbackCount : "0";
+                $userDefaultAddress = UserAddress::find()->where(['user_id' => $requestParam['user_id'], 'is_default' => "1"])->one();
+                $lat = $userDefaultAddress['lat'];
+                $long = $userDefaultAddress['long'];
+                $distance = Common::distance($restaurant[0]['lattitude'], $restaurant[0]['longitude'], $lat, $long, "K");
+                if ($distance > 20) {
+                    $amReponseParam[0]['avg_time'] = "Not available at your location";
+                } else {
+                    $time = floor(($distance / 20) * 60);
+                    $time2 = $time + 10;
+                    $amReponseParam[0]['avg_time'] = $time . "-" . $time2 . " mins";
+
+                }
+
                 $ssMessage = 'Restaurants Details';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 

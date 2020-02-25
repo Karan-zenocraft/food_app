@@ -3,11 +3,11 @@ namespace common\components;
 
 use common\models\EmailFormat;
 use common\models\LeaveQuota;
+use common\models\MenuCategories;
 use common\models\Milestones;
 use common\models\ProblemSets;
 use common\models\Projects;
 use common\models\Questions;
-use common\models\RestaurantFloors;
 use common\models\Restaurants;
 use common\models\SystemConfig;
 use common\models\Tasks;
@@ -281,6 +281,13 @@ class Common
         }
         if ($flag == 4) {
             return Html::a('<i class="icon-list icon-white"></i>', $url, [
+                'title' => Yii::t('yii', $title),
+                'class' => 'btn btn-primary btn-small',
+                //'target' => '_blanck'
+            ]);
+        }
+        if ($flag == 5) {
+            return Html::a('<i class="icon-star icon-white"></i>', $url, [
                 'title' => Yii::t('yii', $title),
                 'class' => 'btn btn-primary btn-small',
                 //'target' => '_blanck'
@@ -1207,8 +1214,14 @@ class Common
             $question = $snQuestionDetail->question;
             return !empty($question) ? $question : '';
         }
-        if ($flag == "RestaurantFloors") {
-            $snRestaurantsDetail = RestaurantFloors::find()->where(['id' => $id])->one();
+        if ($flag == "Restaurants") {
+            $snRestaurantsDetail = Restaurants::find()->where(['id' => $id])->one();
+            $name = $snRestaurantsDetail->name;
+            return !empty($name) ? $name : '';
+
+        }
+        if ($flag == "MenuCategories") {
+            $snRestaurantsDetail = MenuCategories::find()->where(['id' => $id])->one();
             $name = $snRestaurantsDetail->name;
             return !empty($name) ? $name : '';
 
@@ -1929,5 +1942,41 @@ class Common
         $string = preg_replace('/[()-]/', '', $string); // Removes special chars.
         return preg_replace('/-+/', '-', $string); // Replaces multiple hyphens with single one.*/
         return preg_replace('/[^A-Za-z0-9]/', "", $string);
+    }
+    public static function distance($lat1, $lon1, $lat2, $lon2, $unit)
+    {
+        if (($lat1 == $lat2) && ($lon1 == $lon2)) {
+            return 0;
+        } else {
+            $theta = $lon1 - $lon2;
+            $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+            $dist = acos($dist);
+            $dist = rad2deg($dist);
+            $miles = $dist * 60 * 1.1515;
+            $unit = strtoupper($unit);
+
+            if ($unit == "K") {
+                return ($miles * 1.609344);
+            } else if ($unit == "N") {
+                return ($miles * 0.8684);
+            } else {
+                return $miles;
+            }
+        }
+    }
+    public static function haversineGreatCircleDistance(
+        $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000) {
+        // convert from degrees to radians
+        $latFrom = deg2rad($latitudeFrom);
+        $lonFrom = deg2rad($longitudeFrom);
+        $latTo = deg2rad($latitudeTo);
+        $lonTo = deg2rad($longitudeTo);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+        return $angle * $earthRadius;
     }
 }

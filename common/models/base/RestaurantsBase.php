@@ -2,6 +2,7 @@
 
 namespace common\models\base;
 
+use common\models\Feedbacks;
 use common\models\MenuCategories;
 use common\models\RestaurantMenu;
 use common\models\RestaurantsGallery;
@@ -88,7 +89,13 @@ class RestaurantsBase extends \yii\db\ActiveRecord
             'email' => 'Email',
         ];
     }
-
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFeedbacks()
+    {
+        return $this->hasMany(Feedbacks::className(), ['restaurant_id' => 'id']);
+    }
     /**
      * @return \yii\db\ActiveQuery
      */

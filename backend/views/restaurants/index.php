@@ -158,7 +158,7 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
             'class' => 'yii\grid\ActionColumn',
             'headerOptions' => ["style" => "width:40%;"],
             'contentOptions' => ["style" => "width:40%;"],
-            'template' => '{update}{manage_categories}{manage_gallery}{delete}',
+            'template' => '{update}{manage_categories}{manage_feedbacks}{manage_gallery}{delete}',
             'buttons' => [
                 'update' => function ($url, $model) {
                     $flag = 1;
@@ -168,6 +168,13 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                     $title = "Manage Gallery";
                     $flag = 2;
                     $url = Yii::$app->urlManager->createUrl(['restaurants-gallery/index', 'rid' => $model->id]);
+                    return Common::template_view_gallery_button($url, $model, $title, $flag);
+
+                },
+                'manage_feedbacks' => function ($url, $model) {
+                    $title = "Manage Feedbacks";
+                    $flag = 5;
+                    $url = Yii::$app->urlManager->createUrl(['feedbacks/index', 'rid' => $model->id]);
                     return Common::template_view_gallery_button($url, $model, $title, $flag);
 
                 },

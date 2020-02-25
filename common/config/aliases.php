@@ -37,3 +37,20 @@ Yii::setAlias('restaurant_add_message', 'Restaurant has been added successfully 
 Yii::setAlias('restaurant_update_message', 'Restaurant has been updated successfully !');
 Yii::setAlias('restaurant_delete_message', 'Restaurant has been deleted successfully !');
 //END:  Restaurant message
+
+//START: Sub Categories message
+Yii::setAlias('menucategory_add_message', 'menu Category has been added successfully !');
+Yii::setAlias('menucategory_update_message', 'menu Category has been updated successfully !');
+Yii::setAlias('menucategory_delete_message', 'menu Category has been deleted successfully !');
+//END:  Sub Categories message
+
+//START: Sub Categories message
+Yii::setAlias('menu_add_message', 'menu has been added successfully !');
+Yii::setAlias('menu_update_message', 'menu has been updated successfully !');
+Yii::setAlias('menu_delete_message', 'menu has been deleted successfully !');
+//END:  Sub Categories message
+//START: Restaurant Gallery message
+Yii::setAlias('restaurant_gallery_add_message', 'Photo has been added successfully !');
+Yii::setAlias('restaurant_gallery_update_message', 'Photo has been updated successfully !');
+Yii::setAlias('restaurant_gallery_delete_message', 'Photo has been deleted successfully !');
+//END:  Restaurant Gallery message

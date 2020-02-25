@@ -52,6 +52,11 @@ echo $form->field($model, 'restaurant_type')->widget(Select2::classname(), [
     <div class="span3"><?=$form->field($model, 'lattitude')->textInput()?></div>
 </div>
 <div class="row">
+    <div class="span3"> <?=$form->field($model, 'area')->textInput()?></div>
+
+   <div class="span3"> <?=$form->field($model, 'city')->textInput()?></div>
+</div>
+<div class="row">
     <div class="span3"> <?=$form->field($model, 'address')->textInput(['maxlength' => true])?></div>
 
    <div class="span3"> <?=$form->field($model, 'website')->textInput(['maxlength' => true])?></div>
@@ -66,6 +71,7 @@ echo $form->field($model, 'restaurant_type')->widget(Select2::classname(), [
     <div class="span3">
       <?=$form->field($model, 'photo')->fileInput(['id' => 'photo', 'value' => $model->photo]);?>
      </div>
+     <div class="span3">   <?=$form->field($model, 'pincode')->textInput()?></div>
    </div>
    <div class="row">
     <div class="span3">

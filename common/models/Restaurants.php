@@ -22,10 +22,10 @@ class Restaurants extends \common\models\base\RestaurantsBase
     public function rules()
     {
         return [
-            [['name', 'description', 'restaurant_type', 'address', 'lattitude', 'longitude', 'avg_cost_for_two', 'email'], 'required'],
-            [['description'], 'string'],
+            [['name', 'description', 'restaurant_type', 'address', 'lattitude', 'longitude', 'avg_cost_for_two', 'email', 'area', 'city', 'pincode'], 'required'],
+            [['description', 'area', 'city'], 'string'],
             [['photo'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
-            [['lattitude', 'longitude'], 'number'],
+            [['lattitude', 'longitude', 'pincode'], 'number'],
             [['contact_no', 'avg_cost_for_two', 'status'], 'integer'],
             [['created_at', 'updated_at', 'status', 'restaurant_type', 'created_by', 'updated_by', 'is_deleted'], 'safe'],
             [['name', 'address', 'website', 'photo', 'email'], 'string', 'max' => 255],
@@ -56,6 +56,9 @@ class Restaurants extends \common\models\base\RestaurantsBase
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'email' => 'Email',
+            'area' => 'Area',
+            'city' => 'City',
+            'pincode' => 'Pincode',
         ];
     }
     public static function getRestaurantNamesWithId($restaurant_id)
