@@ -48,6 +48,7 @@ class RestaurantsController extends \yii\base\Controller
                     $ttt = $arr;
                     $ttt['photo'] = !empty($ttt['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants/" . $ttt['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $ttt['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                     $ttt['restaurant_type'] = Restaurants::getRestaurantTypes($ttt['restaurant_type'], "type");
+                    $ttt['specialOffers'] = SpecialOffers::getSpecialOffers($ttt['id']);
                     $amResponseData[] = $ttt;
                     return $amResponseData;
                 });
@@ -97,8 +98,50 @@ class RestaurantsController extends \yii\base\Controller
             }])->where(['id' => $requestParam['restaurant_id']])->asArray()->all();
 
             if (!empty($restaurant)) {
+                $restaurantGalleries = $restaurant[0]['restaurantGalleries'];
+                if (!empty($restaurantGalleries)) {
+                    array_walk($restaurantGalleries, function ($arr) use (&$amResponseData) {
+                        $ttt = $arr;
+                        $ttt['image_name'] = !empty($ttt['image_name']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurant/" . $ttt['image_name']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurant/" . $ttt['image_name'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                        $amResponseData[] = $ttt;
+                        return $amResponseData;
+                    });
+
+                    $restaurant[0]['restaurantGalleries'] = $amResponseData;
+                }
+
+                $menuCategories = $restaurant[0]['menuCategories'];
+                if (!empty($menuCategories)) {
+                    array_walk($menuCategories, function ($arr) use (&$amResponseDataCategories) {
+                        $ttt = $arr;
+                        $restaurantMenus = $ttt['restaurantMenus'];
+                        if (!empty($restaurantMenus)) {
+                            array_walk($restaurantMenus, function ($arrMenu) use (&$amResponseDataMenu) {
+                                $tttMenu = $arrMenu;
+                                $tttMenu['photo'] = !empty($tttMenu['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/menus/" . $tttMenu['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/menus/" . $tttMenu['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                                $amResponseDataMenu[] = $tttMenu;
+                                return $amResponseDataMenu;
+                            });
+                            $ttt['restaurantMenus'] = $amResponseDataMenu;
+                        }
+                        $amResponseDataCategories[] = $ttt;
+                        return $amResponseDataCategories;
+                    });
+                    $restaurant[0]['menuCategories'] = $amResponseDataCategories;
+                }
+
                 $amReponseParam = $restaurant;
-                $amReponseParam['specialOffers'] = SpecialOffers::getSpecialOffers($requestParam['restaurant_id']);
+                $specialOffers = SpecialOffers::getSpecialOffers($requestParam['restaurant_id']);
+                if (!empty($specialOffers)) {
+                    array_walk($specialOffers, function ($arr) use (&$amResponseDataOffers) {
+                        $ttt = $arr;
+                        $ttt['photo'] = !empty($ttt['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants_offers/" . $ttt['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants_offers/" . $ttt['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                        $amResponseDataOffers[] = $ttt;
+                        return $amResponseDataOffers;
+                    });
+
+                    $amReponseParam['specialOffers'] = $amResponseDataOffers;
+                }
                 /*            array_walk($restaurantList, function ($arr) use (&$amResponseData) {
                 $ttt = $arr;
                 $ttt['photo'] = !empty($ttt['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants/" . $ttt['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $ttt['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
@@ -111,8 +154,9 @@ class RestaurantsController extends \yii\base\Controller
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
             } else {
+                $amReponseParam = [];
                 $ssMessage = 'Restaurant not found.';
-                $amResponse = Common::errorResponse($ssMessage);
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             }
         } else {
             $ssMessage = 'Invalid User.';
