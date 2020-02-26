@@ -24,6 +24,7 @@ class RestaurantMenu extends \common\models\base\RestaurantMenuBase
     {
         return [
             [['name', 'description', 'price'], 'required'],
+            [['name', 'description', 'price'], 'filter', 'filter' => 'trim'],
             [['restaurant_id', 'menu_category_id', 'created_by', 'updated_by', 'status'], 'integer'],
             [['description'], 'string'],
             [['price'], 'number'],

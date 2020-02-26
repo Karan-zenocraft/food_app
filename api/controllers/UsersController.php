@@ -632,42 +632,42 @@ class UsersController extends \yii\base\Controller
         if (!empty($model)) {
             if (!empty($requestParam['address'])) {
                 $addresses = $requestParam['address'];
-                foreach ($addresses as $key => $address) {
-                    $amRequiredParamsAdd = array('address', 'area', 'lat', 'long', 'is_default', 'address_type');
-                    $amParamsResult = Common::checkRequestParameterKey($address, $amRequiredParamsAdd);
-                    // If any getting error in request paramter then set error message.
-                    if (!empty($amParamsResult['error'])) {
-                        $amResponse = Common::errorResponse($amParamsResult['error']);
-                        Common::encodeResponseJSON($amResponse);
-                    }
-                    if (isset($address['id']) && !empty($address['id'])) {
-                        $addressModel = UserAddress::findOne($address['id']);
-                        if (!empty($addressModel)) {
-                            $addressModel->user_id = $requestParam['user_id'];
-                            $addressModel->address = $address['address'];
-                            $addressModel->area = $address['area'];
-                            $addressModel->lat = $address['lat'];
-                            $addressModel->long = $address['long'];
-                            $addressModel->address_type = $address['address_type'];
-                            $addressModel->save(false);
-                        } else {
-                            $ssMessage = 'Invalid Address id.';
-                            $amResponse = Common::errorResponse($ssMessage);
-                            Common::encodeResponseJSON($amResponse);
-                        }
-                    } else {
-                        $addressModel = new UserAddress();
+                $address = $addresses[0];
+                $amRequiredParamsAdd = array('address', 'area', 'lat', 'long', 'address_type');
+                $amParamsResult = Common::checkRequestParameterKey($address, $amRequiredParamsAdd);
+                // If any getting error in request paramter then set error message.
+                if (!empty($amParamsResult['error'])) {
+                    $amResponse = Common::errorResponse($amParamsResult['error']);
+                    Common::encodeResponseJSON($amResponse);
+                }
+                if (isset($address['id']) && !empty($address['id'])) {
+                    $addressModel = UserAddress::findOne($address['id']);
+                    if (!empty($addressModel)) {
                         $addressModel->user_id = $requestParam['user_id'];
                         $addressModel->address = $address['address'];
                         $addressModel->area = $address['area'];
                         $addressModel->lat = $address['lat'];
                         $addressModel->long = $address['long'];
-                        $addressModel->is_default = $address['is_default'];
                         $addressModel->address_type = $address['address_type'];
                         $addressModel->save(false);
+                    } else {
+                        $ssMessage = 'Invalid Address id.';
+                        $amResponse = Common::errorResponse($ssMessage);
+                        Common::encodeResponseJSON($amResponse);
                     }
-
+                } else {
+                    $useraddresses = UserAddress::updateAll(['is_default' => '0'], ['user_id' => $requestParam['user_id']]);
+                    $addressModel = new UserAddress();
+                    $addressModel->user_id = $requestParam['user_id'];
+                    $addressModel->address = $address['address'];
+                    $addressModel->area = $address['area'];
+                    $addressModel->lat = $address['lat'];
+                    $addressModel->long = $address['long'];
+                    $addressModel->is_default = 1;
+                    $addressModel->address_type = $address['address_type'];
+                    $addressModel->save(false);
                 }
+
                 $response = UserAddress::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
                 $ssMessage = 'Your address has been added successfully.';
                 $amReponseParam = $response;

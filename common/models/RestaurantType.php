@@ -19,6 +19,7 @@ class RestaurantType extends \common\models\base\RestaurantTypeBase
     {
         return [
             [['type', 'description'], 'required'],
+            [['type', 'description'], 'filter', 'filter' => 'trim'],
             [['created_at', 'updated_at'], 'safe'],
             [['type', 'description'], 'string', 'max' => 255],
         ];

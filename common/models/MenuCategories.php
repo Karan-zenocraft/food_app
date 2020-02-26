@@ -19,6 +19,7 @@ class MenuCategories extends \common\models\base\MenuCategoriesBase
     {
         return [
             [['name', 'status', 'description'], 'required'],
+            [['name', 'status', 'description'], 'filter', 'filter' => 'trim'],
             [['restaurant_id', 'status'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'description'], 'string', 'max' => 255],
