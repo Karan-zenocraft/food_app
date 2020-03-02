@@ -173,6 +173,8 @@ class RestaurantsController extends \yii\base\Controller
                     });
 
                     $amReponseParam[0]['specialOffers'] = $amResponseDataOffers;
+                } else {
+                    $amReponseParam[0]['specialOffers'] = [];
                 }
                 $Feedbacks = Feedbacks::find()->select("AVG(rating) AS rating")->where(["restaurant_id" => $requestParam['restaurant_id']])->asArray()->all();
 
