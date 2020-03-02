@@ -88,8 +88,9 @@ class RestaurantsController extends \yii\base\Controller
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
             } else {
+                $amReponseParam = [];
                 $ssMessage = 'Restaurants not found.';
-                $amResponse = Common::errorResponse($ssMessage);
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             }
         } else {
             $ssMessage = 'Invalid User.';
@@ -276,8 +277,9 @@ class RestaurantsController extends \yii\base\Controller
                     $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
                 } else {
+                    $amReponseParam = [];
                     $ssMessage = 'Restaurants not found.';
-                    $amResponse = Common::errorResponse($ssMessage);
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
                 }
             }
         } else {
