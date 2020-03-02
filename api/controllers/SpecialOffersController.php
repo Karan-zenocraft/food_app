@@ -67,8 +67,9 @@ class SpecialOffersController extends \yii\base\Controller
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
             } else {
+                $amReponseParam = [];
                 $ssMessage = 'Special Offers not found.';
-                $amResponse = Common::errorResponse($ssMessage);
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             }
         } else {
             $ssMessage = 'Invalid User.';
