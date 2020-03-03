@@ -64,8 +64,13 @@ class RestaurantsController extends \yii\base\Controller
                     $ttt['restaurant_type'] = Restaurants::getRestaurantTypes($ttt['restaurant_type'], "type");
                     $ttt['specialOffers'] = SpecialOffers::getSpecialOffers($ttt['id']);
                     $userDefaultAddress = UserAddress::find()->where(['user_id' => $requestParam['user_id'], 'is_default' => "1"])->one();
-                    $lat = $userDefaultAddress['lat'];
-                    $long = $userDefaultAddress['long'];
+                    if (!empty($requestParam['lat']) && !empty($requestParam['longg'])) {
+                        $lat = $requestParam['lat'];
+                        $long = $requestParam['longg'];
+                    } else {
+                        $lat = $userDefaultAddress['lat'];
+                        $long = $userDefaultAddress['long'];
+                    }
                     $distance = Common::distance($ttt['lattitude'], $ttt['longitude'], $lat, $long, "K");
                     if ($distance > 20) {
                         $ttt['avg_time'] = "Not available at your location";
