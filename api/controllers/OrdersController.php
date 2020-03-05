@@ -8,6 +8,7 @@ use common\components\Common;
 use common\models\OrderMenus;
 use common\models\OrderPayment;
 use common\models\Orders;
+use common\models\UserFavouriteOrders;
 use common\models\Users;
 use Yii;
 use yii\web\Controller;
@@ -117,8 +118,15 @@ class OrdersController extends \yii\base\Controller
             $orderList = Orders::find()->with('orderPayments')->with('orderMenus')->where(['user_id' => $requestParam['user_id']])->asArray()->all();
 
             if (!empty($orderList)) {
-
-                $amReponseParam = $orderList;
+                $favouriteOrders = UserFavouriteOrders::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
+                $favouriteOrders_arr = array_column($favouriteOrders, 'order_id');
+                array_walk($orderList, function ($arr) use (&$amResponseData, $favouriteOrders_arr) {
+                    $ttt = $arr;
+                    $ttt['is_favourite'] = in_array($ttt['id'], $favouriteOrders_arr) ? "true" : "false";
+                    $amResponseData[] = $ttt;
+                    return $amResponseData;
+                });
+                $amReponseParam = $amResponseData;
                 $ssMessage = 'Orders List';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
@@ -171,6 +179,157 @@ class OrdersController extends \yii\base\Controller
             } else {
                 $amReponseParam = [];
                 $ssMessage = 'Order not found.';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionAddOrderToFavourite()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'order_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne($snUserId);
+        if (!empty($model)) {
+            $orderVerify = Orders::find()->where(['user_id' => $requestParam['user_id'], "id" => $requestParam['order_id']])->one();
+
+            if (!empty($orderVerify)) {
+                $orderFavourite = UserFavouriteOrders::find()->where(['user_id' => $requestParam['user_id'], "order_id" => $requestParam['order_id']])->one();
+                if (!empty($orderFavourite)) {
+                    $ssMessage = 'This Order is already added to favourite.';
+                    $amResponse = Common::errorResponse($ssMessage);
+                    Common::encodeResponseJSON($amResponse);
+                } else {
+                    $favouriteOrder = new UserFavouriteOrders();
+                    $favouriteOrder->user_id = $requestParam['user_id'];
+                    $favouriteOrder->order_id = $requestParam['order_id'];
+                    $favouriteOrder->save(false);
+                    $amReponseParam = $favouriteOrder;
+                    $ssMessage = 'Order successfully added to favourite.';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                }
+
+            } else {
+                $amReponseParam = [];
+                $ssMessage = 'Order not found.';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionRemoveOrderFromFavourite()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'order_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne($snUserId);
+        if (!empty($model)) {
+            $orderVerify = Orders::find()->where(['user_id' => $requestParam['user_id'], "id" => $requestParam['order_id']])->one();
+
+            if (!empty($orderVerify)) {
+                $favouriteOrder = UserFavouriteOrders::find()->where(["user_id" => $requestParam['user_id'], "order_id" => $requestParam['order_id']])->one();
+                if (!empty($favouriteOrder)) {
+                    $favouriteOrder->delete();
+                    $amReponseParam = [];
+                    $ssMessage = 'Order successfully removed from the favourite.';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                } else {
+                    $amReponseParam = [];
+                    $ssMessage = 'Order already removed from the favourite';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                }
+            } else {
+                $amReponseParam = [];
+                $ssMessage = 'Order not found.';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionGetUserFavouriteOrdersList()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne($snUserId);
+        if (!empty($model)) {
+            $favouriteOrderList = UserFavouriteOrders::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
+            if (!empty($favouriteOrderList)) {
+                $amReponseParam = $favouriteOrderList;
+                $ssMessage = "User's favourite orders List";
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $amReponseParam = [];
+                $ssMessage = 'No favourite orders found.';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             }
         } else {
