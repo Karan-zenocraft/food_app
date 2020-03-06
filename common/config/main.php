@@ -35,8 +35,8 @@ return [
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
                 'host' => 'smtp.gmail.com',
-                'username' => 'askb4pet@gmail.com',
-                'password' => 'Temppassword!',
+                'username' => 'fooddeliveryapp12@gmail.com',
+                'password' => 'Zenocraft@123',
                 'port' => '587',
                 'encryption' => 'tls',
             ],
