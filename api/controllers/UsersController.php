@@ -566,7 +566,7 @@ class UsersController extends \yii\base\Controller
         $amData = Common::checkRequestType();
         $amResponse = array();
         $ssMessage = '';
-        $amRequiredParams = array('user_id', 'device_id');
+        $amRequiredParams = array('user_id');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
         // If any getting error in request paramter then set error message.
         if (!empty($amParamsResult['error'])) {
@@ -582,16 +582,19 @@ class UsersController extends \yii\base\Controller
 
         $userModel = Users::findOne(['id' => $requestParam['user_id']]);
         if (!empty($userModel)) {
-            if (($device_model = Devicedetails::findOne(['device_tocken' => $amData['request_param']['device_id'], 'user_id' => $requestParam['user_id']])) !== null) {
-                $device_model->delete();
-                $userModel->auth_token = "";
-                $userModel->save(false);
-                $ssMessage = 'Logout successfully';
-                $amResponse = Common::successResponse($ssMessage, $amReponseParam = '');
-            } else {
-                $ssMessage = 'Your deivce token is invalid.';
-                $amResponse = Common::errorResponse($ssMessage);
+            if (!empty($amData['request_param']['device_id'])) {
+                if (($device_model = Devicedetails::findOne(['device_tocken' => $amData['request_param']['device_id'], 'user_id' => $requestParam['user_id']])) !== null) {
+                    $device_model->delete();
+                } else {
+                    $ssMessage = 'Your deivce token is invalid.';
+                    $amResponse = Common::errorResponse($ssMessage);
+                }
             }
+            $userModel->auth_token = "";
+            $userModel->save(false);
+            $ssMessage = 'Logout successfully';
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam = '');
+
         } else {
             $ssMessage = 'Invalid user_id';
             $amResponse = Common::errorResponse($ssMessage);
