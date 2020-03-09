@@ -37,6 +37,11 @@ return [
         'stripe' => '2',
         'cod' => '3',
     ],
+    'payment_type_value' => [
+        '1' => 'paypal',
+        '2' => 'stripe',
+        '3' => 'Cash On Delivery',
+    ],
     'order_status' => ['placed' => '1', 'on_the_way' => '2', 'delievered' => '3', 'cancelled' => '4'],
     'order_status_value' => ['1' => 'Placed', '2' => 'On the Way', '3' => 'Delievered', '4' => 'Cancelled'],
 ];

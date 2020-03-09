@@ -4,6 +4,7 @@ namespace common\models\base;
 
 use common\models\OrderMenus;
 use common\models\OrderPayment;
+use common\models\UserAddress;
 use common\models\Users;
 use Yii;
 
@@ -44,7 +45,7 @@ class OrdersBase extends \yii\db\ActiveRecord
             [['user_id', 'status'], 'integer'],
             [['payment_type'], 'string'],
             [['total_amount', 'delivery_charges', 'other_charges'], 'number'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'user_address_id'], 'safe'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
@@ -56,12 +57,13 @@ class OrdersBase extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'user_id' => 'User ID',
+            'user_id' => 'Buyer',
             'payment_type' => 'Payment Type',
             'total_amount' => 'Total Amount',
             'delivery_charges' => 'Delivery Charges',
             'other_charges' => 'Other Charges',
             'status' => 'Status',
+            'user_address_id' => 'Shipping Address',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -74,13 +76,17 @@ class OrdersBase extends \yii\db\ActiveRecord
     {
         return $this->hasMany(OrderMenus::className(), ['order_id' => 'id']);
     }
+    public function getUserAddress()
+    {
+        return $this->hasOne(UserAddress::className(), ['id' => 'user_address_id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getOrderPayments()
     {
-        return $this->hasMany(OrderPayment::className(), ['order_id' => 'id']);
+        return $this->hasOne(OrderPayment::className(), ['order_id' => 'id']);
     }
 
     /**

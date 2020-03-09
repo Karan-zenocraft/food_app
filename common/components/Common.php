@@ -332,6 +332,16 @@ class Common
         ]);
 
     }
+    public static function template_view_menu_items($url, $model, $flag)
+    {
+
+        return Html::a('<i class="icon-glass icon-white"></i> ', $url, [
+            'title' => Yii::t('yii', "View Menu Items"),
+            'class' => 'btn btn-primary btn-small colorbox_popup',
+            'onClick' => 'javascript:openColorBox(700,300);',
+        ]);
+
+    }
     /*
      * Set designing for Grideview update button
      */
