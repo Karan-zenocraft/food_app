@@ -25,7 +25,7 @@ class OrdersController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'total_amount', 'transaction_id', 'payment_type');
+        $amRequiredParams = array('user_id', 'total_amount', 'transaction_id', 'payment_type', 'user_address_id');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -50,6 +50,7 @@ class OrdersController extends \yii\base\Controller
             $order->status = Yii::$app->params['order_status']['placed'];
             $order->delivery_charges = $requestParam['delivery_charges'];
             $order->other_charges = $requestParam['other_charges'];
+            $order->user_address_id = $requestParam['user_address_id'];
 
             if ($order->save(false)) {
                 $amReponseParam['order'] = $order;
