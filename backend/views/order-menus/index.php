@@ -44,7 +44,24 @@ $this->params['breadcrumbs'][] = $this->title;
         //'created_at',
         //'updated_at',
 
-        // ['class' => 'yii\grid\ActionColumn'],
+        [
+            'header' => 'Actions',
+            'class' => 'yii\grid\ActionColumn',
+            'headerOptions' => ["style" => "width:40%;"],
+            'contentOptions' => ["style" => "width:40%;"],
+            'template' => '{view_menu_items}',
+            'buttons' => [
+
+                'view_menu_items' => function ($url, $model) {
+                    $title = "View menu Items";
+                    $flag = 1;
+                    $url = Yii::$app->urlManager->createUrl(['order-menus/index', 'order_id' => $model->id]);
+                    return Common::template_view_menu_items($url, $model, $title, $flag);
+
+                },
+
+            ],
+        ],
     ],
 ]);?>
 

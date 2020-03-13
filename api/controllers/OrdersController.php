@@ -8,6 +8,7 @@ use common\components\Common;
 use common\models\OrderMenus;
 use common\models\OrderPayment;
 use common\models\Orders;
+use common\models\Restaurants;
 use common\models\UserFavouriteOrders;
 use common\models\Users;
 use Yii;
@@ -124,6 +125,17 @@ class OrdersController extends \yii\base\Controller
                 array_walk($orderList, function ($arr) use (&$amResponseData, $favouriteOrders_arr) {
                     $ttt = $arr;
                     $ttt['is_favourite'] = in_array($ttt['id'], $favouriteOrders_arr) ? "true" : "false";
+                    $orderMenus = $ttt['orderMenus'];
+                    array_walk($orderMenus, function ($arr) use (&$menus, $favouriteOrders_arr) {
+                        $ttt = $arr;
+                        $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
+                        $ttt['restaurant_name'] = $restaurant->name;
+                        $ttt['restaurant_area'] = $restaurant->area;
+                        $menus[] = $ttt;
+                        return $menus;
+                    });
+                    $ttt['orderMenus'] = $menus;
+                    $ttt['restaurant_name'] = $menus[0]['restaurant_name'];
                     $amResponseData[] = $ttt;
                     return $amResponseData;
                 });
