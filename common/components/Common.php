@@ -8,6 +8,7 @@ use common\models\Milestones;
 use common\models\ProblemSets;
 use common\models\Projects;
 use common\models\Questions;
+use common\models\RestaurantMenu;
 use common\models\Restaurants;
 use common\models\SystemConfig;
 use common\models\Tasks;
@@ -1232,6 +1233,12 @@ class Common
         }
         if ($flag == "MenuCategories") {
             $snRestaurantsDetail = MenuCategories::find()->where(['id' => $id])->one();
+            $name = $snRestaurantsDetail->name;
+            return !empty($name) ? $name : '';
+
+        }
+        if ($flag == "RestaurantMenu") {
+            $snRestaurantsDetail = RestaurantMenu::find()->where(['id' => $id])->one();
             $name = $snRestaurantsDetail->name;
             return !empty($name) ? $name : '';
 

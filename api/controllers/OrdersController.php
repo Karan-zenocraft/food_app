@@ -131,6 +131,8 @@ class OrdersController extends \yii\base\Controller
                         $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
                         $ttt['restaurant_name'] = $restaurant->name;
                         $ttt['restaurant_area'] = $restaurant->area;
+                        $ttt['menu_name'] = Common::get_name_by_id($ttt['menu_id'], 'RestaurantMenu');
+
                         $menus[] = $ttt;
                         return $menus;
                     });
@@ -190,6 +192,7 @@ class OrdersController extends \yii\base\Controller
                     $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
                     $ttt['restaurant_name'] = $restaurant->name;
                     $ttt['restaurant_area'] = $restaurant->area;
+                    $ttt['menu_name'] = Common::get_name_by_id($ttt['menu_id'], 'RestaurantMenu');
                     $menus[] = $ttt;
                     return $menus;
                 });

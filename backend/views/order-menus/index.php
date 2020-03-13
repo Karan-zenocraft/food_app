@@ -1,5 +1,6 @@
 <?php
 
+use common\components\Common;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
