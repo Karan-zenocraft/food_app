@@ -183,7 +183,7 @@ class OrdersController extends \yii\base\Controller
         $snUserId = $requestParam['user_id'];
         $model = Users::findOne($snUserId);
         if (!empty($model)) {
-            $orderDetails = Orders::find()->with('orderPayments')->with('orderMenus')->where(['user_id' => $requestParam['user_id'], "id" => $requestParam['order_id']])->asArray()->all();
+            $orderDetails = Orders::find()->with('orderPayments')->with('orderMenus')->with('userAddress')->where(['user_id' => $requestParam['user_id'], "id" => $requestParam['order_id']])->asArray()->all();
 
             if (!empty($orderDetails)) {
                 $orderMenus = $orderDetails[0]['orderMenus'];
