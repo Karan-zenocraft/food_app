@@ -184,7 +184,17 @@ class OrdersController extends \yii\base\Controller
             $orderDetails = Orders::find()->with('orderPayments')->with('orderMenus')->where(['user_id' => $requestParam['user_id'], "id" => $requestParam['order_id']])->asArray()->all();
 
             if (!empty($orderDetails)) {
-
+                $orderMenus = $orderDetails[0]['orderMenus'];
+                array_walk($orderMenus, function ($arr) use (&$menus) {
+                    $ttt = $arr;
+                    $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
+                    $ttt['restaurant_name'] = $restaurant->name;
+                    $ttt['restaurant_area'] = $restaurant->area;
+                    $menus[] = $ttt;
+                    return $menus;
+                });
+                $orderDetails[0]['orderMenus'] = $menus;
+                $orderDetails[0]['restaurant_name'] = $menus[0]['restaurant_name'];
                 $amReponseParam = $orderDetails;
                 $ssMessage = 'Orders Details';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
