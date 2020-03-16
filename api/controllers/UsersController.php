@@ -927,6 +927,7 @@ class UsersController extends \yii\base\Controller
             $deviceModel = DeviceDetails::find()->where(["user_id" => $requestParam['user_id']])->one();
             $deviceModel->device_tocken = $requestParam['device_token'];
             $deviceModel->save(false);
+            $deviceModel->gcm_id = !empty($deviceModel->gcm_id) ? $deviceModel->gcm_id : "";
             $ssMessage = "Device Token updated successfully.";
             $amReponseParam = $deviceModel;
             $amResponse = Common::successResponse($ssMessage, $amReponseParam);
