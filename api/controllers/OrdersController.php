@@ -184,9 +184,12 @@ class OrdersController extends \yii\base\Controller
         $model = Users::findOne($snUserId);
         if (!empty($model)) {
             $orderDetails = Orders::find()->with('orderPayments')->with('orderMenus')->with('userAddress')->where(['user_id' => $requestParam['user_id'], "id" => $requestParam['order_id']])->asArray()->all();
+            $favouriteOrders = UserFavouriteOrders::find()->where(['user_id' => $requestParam['user_id']])->asArray()->all();
+            $favouriteOrders_arr = array_column($favouriteOrders, 'order_id');
 
             if (!empty($orderDetails)) {
                 $orderMenus = $orderDetails[0]['orderMenus'];
+                $orderDetails[0]['is_favourite'] = in_array($orderDetails[0]['id'], $favouriteOrders_arr) ? "true" : "false";
                 array_walk($orderMenus, function ($arr) use (&$menus) {
                     $ttt = $arr;
                     $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
