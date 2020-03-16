@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\DeviceDetails;
+use common\models\NotificationList;
 use common\models\UserAddress;
 use Yii;
 
@@ -75,6 +76,10 @@ class Users extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'restaurant_id' => 'Restaurant ID',
         ];
+    }
+    public function getNotificationLists()
+    {
+        return $this->hasMany(NotificationList::className(), ['user_id' => 'id']);
     }
 
     /**
