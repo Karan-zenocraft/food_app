@@ -13,7 +13,7 @@ return [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=food_app',
             'username' => 'root',
-            'password' => 'Zenocraft@123',
+            'password' => 'rutusha@123',
             'charset' => 'utf8',
         ],
         'assetManager' => [
