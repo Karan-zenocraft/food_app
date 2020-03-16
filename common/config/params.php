@@ -44,5 +44,5 @@ return [
     ],
     'order_status' => ['placed' => '1', 'on_the_way' => '2', 'delievered' => '3', 'cancelled' => '4'],
     'order_status_value' => ['1' => 'Placed', '2' => 'On the Way', '3' => 'Delievered', '4' => 'Cancelled'],
-    'android_fcm_api_key' => 'AAAA93T7JUs:APA91bHrih1kRZLX9QMb4SB6i27RdDz6yJ8WbLWCfy6QWw_eId3EL3aP5WYprNyAZptCMqe5dwZJB_uUyQpPePWkvBEGLfZsnlOoPHTtSRYi3JXPeM76FjHss0XQmibn1hJTZy-yx0ak',
+    'android_fcm_api_key' => 'AAAAy6A2HXo:APA91bFNAdf-gRAwul4F-JI7Bd68dpofkpCJWWC8EPzUCxVKn-xBHt1tD3C8pVXdHRbrSH92e8JWzQyt7MMJnIHn6P3Hn8Vd7hTWHOT8ai9-9UDNUfpPPP3R7mL2niLDfLn5tsJFpYqB',
 ];

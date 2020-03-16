@@ -1848,7 +1848,7 @@ class Common
             }
         }
     }
-    public function push_notification_android($device_id, $message)
+    public function push_notification_android($device_id, $title, $body)
     {
 
         //API URL of FCM
@@ -1863,6 +1863,10 @@ class Common
             ),
             'data' => array(
                 "message" => $message,
+            ),
+            'notification' => array(
+                'title' => $title,
+                'body' => $body,
             ),
         );
 

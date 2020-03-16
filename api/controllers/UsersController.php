@@ -891,5 +891,51 @@ class UsersController extends \yii\base\Controller
         // FOR ENCODE RESPONSE INTO JSON //
         Common::encodeResponseJSON($amResponse);
     }
+    public function actionSendNotification()
+    {
+        $title = "Android Notification title";
+        $body = "Android Notification Message";
+        $actionSendNotification = Common::push_notification_android("fIWU-c9XH3k:APA91bFqKmvP3_rCb0Z1Kvi7Bqam-Z7hGKnEAP6vUdQ83GmTsV6UF0yeEXFuxdj5vl4o4BPGntfPSwyWG7GYPs69bRMWMV1XyIGjM1c-9b7wRNq198GtdkzHbOZDaYj4mcuEeIfdbW9t", $title, $body);
+        p($actionSendNotification);
+    }
+
+    public function actionRefreshDeviceToken()
+    {
+
+        $amData = Common::checkRequestType();
+
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'device_token');
+
+        $amParamsResult = Common::checkRequiredParams($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $oModelUser = Users::findOne($requestParam['user_id']);
+        if (!empty($oModelUser)) {
+            $deviceModel = DeviceDetails::find()->where(["user_id" => $requestParam['user_id']])->one();
+            $deviceModel->device_tocken = $requestParam['device_token'];
+            $deviceModel->save(false);
+            $ssMessage = "Device Token updated successfully.";
+            $amReponseParam = $deviceModel;
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
 
 }
