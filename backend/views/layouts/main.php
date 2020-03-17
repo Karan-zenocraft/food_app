@@ -31,8 +31,8 @@ CommonAppAsset::register($this);
                         <span class="icon-bar"></span>
                     </a>
                     <a class="brand logo" href="<?=\Yii::$app->urlManager->createUrl(['site/index']);?>">
-                       <img src="http://zenocraft.com/clin_essentials/image/ClinEApp-logo.png" style="max-width: 100px!important;height: auto!important;width: 100px!important;" alt="" class="img-fluid">
-                        
+                       <img src="<?php echo Yii::$app->params['root_url'] . '/common/web/img/logo.png' ?>" style="max-width: 65px!important;height: auto!important;width: 65px!important;" alt="" class="img-fluid">
+
                     </a>
                     <div class="nav-collapse">
                         <ul class="nav pull-right">
@@ -92,7 +92,7 @@ Breadcrumbs::widget([
                 </div>
             </div>
             <hr>
-            
+
         </div>
         <footer class="footer">
                 <div class="container">
