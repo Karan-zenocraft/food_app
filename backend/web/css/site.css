@@ -19,6 +19,7 @@ body {
     background-color: #f5f5f5;
     border-top: 1px solid #ddd;
     padding-top: 20px;
+
 }
 
 .jumbotron {
@@ -109,6 +110,7 @@ a.desc:after {
         width: 100%;
         padding: 10px 15px;
     }
+    
 }
 
 .nav > li > form > button.logout:focus,

@@ -28,8 +28,9 @@ AppAsset::register($this);
 
 <div class="wrap">
     <?php
+$img = '<img src="http://zenocraft.com/clin_essentials/image/ClinEApp-logo.png" alt="Clin Essentials" width="100px">';
 NavBar::begin([
-    'brandLabel' => "Food App",
+    'brandLabel' => $img,
     'brandUrl' => Yii::$app->homeUrl,
     'options' => [
         'class' => 'navbar-inverse navbar-fixed-top',

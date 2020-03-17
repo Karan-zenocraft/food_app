@@ -1,4 +1,5 @@
 <?php
+
 use common\models\Restaurants;
 use common\models\SpecialOffers;
 use common\models\Users;
