@@ -87,7 +87,7 @@ class UsersController extends \yii\base\Controller
                     $amReponseParam['device_token'] = $device_model->device_tocken;
                     $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                     $amReponseParam['auth_token'] = $ssAuthToken;
-
+                    $amReponseParam['login_type'] = $model->login_type;
                     $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
                 }
             } else {
