@@ -591,9 +591,10 @@ class UsersController extends \yii\base\Controller
                 }
             }
             $userModel->auth_token = "";
+            $amReponseParam = [];
             $userModel->save(false);
             $ssMessage = 'Logout successfully';
-            $amResponse = Common::successResponse($ssMessage, $amReponseParam = '');
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
         } else {
             $ssMessage = 'Invalid user_id';
