@@ -329,7 +329,7 @@ class Common
         return Html::a('<i class="icon-time icon-white"></i> ', $url, [
             'title' => Yii::t('yii', "Edit Restaurant's working Hours"),
             'class' => 'btn btn-primary btn-small colorbox_popup',
-            'onClick' => 'javascript:openColorBox(1090,820);',
+            'onClick' => 'javascript:openColorBox(400,420);',
         ]);
 
     }

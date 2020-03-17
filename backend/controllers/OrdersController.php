@@ -3,6 +3,8 @@
 namespace backend\controllers;
 
 use backend\components\AdminCoreController;
+use common\components\Common;
+use common\models\DeviceDetails;
 use common\models\Orders;
 use common\models\OrdersSearch;
 use Yii;
@@ -108,7 +110,30 @@ class OrdersController extends AdminCoreController
 
         return $this->redirect(['index']);
     }
+    public function actionAcceptOrder($order_id)
+    {
+        $this->layout = 'popup';
+        $orderModel = Orders::find()->where(['id' => $order_id])->one();
+        if (!empty(Yii::$app->request->post()) && !empty($orderModel)) {
+            $postData = Yii::$app->request->post();
+            $orderModel->status = $postData['Orders']['status'];
+            if ($orderModel->save(false)) {
+                $user_id = $orderModel->user_id;
+                $deviceModel = DeviceDetails::find()->select('device_tocken')->where(['user_id' => $user_id])->one();
+                $device_tocken = $deviceModel->device_tocken;
+                $title = "Order Status Notification";
+                $body = "Your order is " . Yii::$app->params['order_status_value'][$orderModel->status];
+                Common::push_notification_android($device_tocken, $title, $body);
 
+            }
+            Yii::$app->session->setFlash('success', Yii::getAlias('@order_update_message'));
+            return Common::closeColorBox();
+
+        }
+        return $this->render('accept_order', [
+            'orderModel' => $orderModel,
+        ]);
+    }
     /**
      * Finds the Orders model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

@@ -94,9 +94,7 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
         [
             'header' => 'Actions',
             'class' => 'yii\grid\ActionColumn',
-            'headerOptions' => ["style" => "width:40%;"],
-            'contentOptions' => ["style" => "width:40%;"],
-            'template' => '{view_menu_items}',
+            'template' => '{view_menu_items}{accept_order}',
             'buttons' => [
 
                 'view_menu_items' => function ($url, $model) {
@@ -104,6 +102,13 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                     $flag = 1;
                     $url = Yii::$app->urlManager->createUrl(['order-menus/index', 'order_id' => $model->id]);
                     return Common::template_view_menu_items($url, $model, $title, $flag);
+
+                },
+                'accept_order' => function ($url, $model) {
+                    $title = "Accept Order";
+                    $flag = 1;
+                    $url = Yii::$app->urlManager->createUrl(['orders/accept-order', 'order_id' => $model->id]);
+                    return Common::template_update_permission_button($url, $model, $title, $flag);
 
                 },
 
