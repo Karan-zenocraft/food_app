@@ -5,6 +5,7 @@ namespace backend\controllers;
 use backend\components\AdminCoreController;
 use common\components\Common;
 use common\models\DeviceDetails;
+use common\models\NotificationList;
 use common\models\Orders;
 use common\models\OrdersSearch;
 use Yii;
@@ -119,11 +120,24 @@ class OrdersController extends AdminCoreController
             $orderModel->status = $postData['Orders']['status'];
             if ($orderModel->save(false)) {
                 $user_id = $orderModel->user_id;
-                $deviceModel = DeviceDetails::find()->select('device_tocken')->where(['user_id' => $user_id])->one();
+                $deviceModel = DeviceDetails::find()->select('device_tocken,type')->where(['user_id' => $user_id])->one();
                 $device_tocken = $deviceModel->device_tocken;
+                $type = $deviceModel->type;
                 $title = "Order Status Notification";
                 $body = "Your order is " . Yii::$app->params['order_status_value'][$orderModel->status];
-                Common::push_notification_android($device_tocken, $title, $body);
+                if ($type == Yii::$app->params['device_type']['android']) {
+                    $status = Common::push_notification_android($device_tocken, $title, $body);
+                } else {
+                    $status = Common::push_notification_android($device_tocken, $title, $body);
+                }
+                if ($status) {
+                    $NotificationListModel = new NotificationList();
+                    $NotificationListModel->user_id = $user_id;
+                    $NotificationListModel->title = $title;
+                    $NotificationListModel->body = $body;
+                    $NotificationListModel->status = 1;
+                    $NotificationListModel->save(false);
+                }
 
             }
             Yii::$app->session->setFlash('success', Yii::getAlias('@order_update_message'));

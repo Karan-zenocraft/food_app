@@ -46,4 +46,5 @@ return [
     'order_status_admin' => ['2' => 'Accept', '5' => 'Cancel'],
     'order_status_value' => ['1' => 'Placed', '2' => 'Accepted', '3' => 'On the Way', '4' => 'Delievered', '5' => 'Cancelled'],
     'android_fcm_api_key' => 'AAAAy6A2HXo:APA91bFNAdf-gRAwul4F-JI7Bd68dpofkpCJWWC8EPzUCxVKn-xBHt1tD3C8pVXdHRbrSH92e8JWzQyt7MMJnIHn6P3Hn8Vd7hTWHOT8ai9-9UDNUfpPPP3R7mL2niLDfLn5tsJFpYqB',
+    'device_type' => ["android" => "1", "ios" => "2"],
 ];

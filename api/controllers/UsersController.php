@@ -42,7 +42,7 @@ class UsersController extends \yii\base\Controller
         }
         $requestParam = $amData['request_param'];
         if ($requestParam['login_type'] == "1") {
-            $amRequiredParams = array('email', 'password', 'device_id', 'login_type');
+            $amRequiredParams = array('email', 'password', 'device_id', 'login_type', 'device_type');
             $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
             // If any getting error in request paramter then set error message.
@@ -69,7 +69,7 @@ class UsersController extends \yii\base\Controller
 
                     $device_model->setAttributes($amData['request_param']);
                     $device_model->device_tocken = $requestParam['device_id'];
-                    $device_model->type = "1";
+                    $device_model->type = $requestParam['device_type'];
                     $device_model->user_id = $model->id;
                     //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
                     $device_model->save(false);
@@ -85,6 +85,7 @@ class UsersController extends \yii\base\Controller
                     $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
                     $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                     $amReponseParam['device_token'] = $device_model->device_tocken;
+                    $amReponseParam['device_type'] = $device_model->type;
                     $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                     $amReponseParam['auth_token'] = $ssAuthToken;
                     $amReponseParam['login_type'] = $model->login_type;
@@ -95,7 +96,7 @@ class UsersController extends \yii\base\Controller
                 $amResponse = Common::errorResponse($ssMessage);
             }
         } else {
-            $amRequiredParams = array('email', 'device_id', 'login_type', 'photo', 'user_name');
+            $amRequiredParams = array('email', 'device_id', 'login_type', 'photo', 'user_name', 'device_type');
             $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
             // If any getting error in request paramter then set error message.
@@ -118,7 +119,8 @@ class UsersController extends \yii\base\Controller
 
                         $device_model->setAttributes($amData['request_param']);
                         $device_model->device_tocken = $requestParam['device_id'];
-                        $device_model->type = "1";
+                        $device_model->type = $requestParam['device_type'];
+
                         $device_model->user_id = $model->id;
                         //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
                         $device_model->save(false);
@@ -134,6 +136,7 @@ class UsersController extends \yii\base\Controller
                         $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
                         $amReponseParam['photo'] = !empty($model->photo) ? $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                         $amReponseParam['device_token'] = $device_model->device_tocken;
+                        $amReponseParam['device_type'] = $device_model->type;
                         $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                         $amReponseParam['auth_token'] = $ssAuthToken;
                         $amReponseParam['login_type'] = $model->login_type;
@@ -153,7 +156,7 @@ class UsersController extends \yii\base\Controller
                     }
                     $device_model->setAttributes($amData['request_param']);
                     $device_model->device_tocken = $requestParam['device_id'];
-                    $device_model->type = "1";
+                    $device_model->type = $requestParam['device_type'];
                     $device_model->user_id = $model->id;
                     //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
                     $device_model->save(false);
@@ -165,6 +168,7 @@ class UsersController extends \yii\base\Controller
                     $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
                     $amReponseParam['photo'] = !empty($model->photo) ? $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                     $amReponseParam['device_token'] = $device_model->device_tocken;
+                    $amReponseParam['device_type'] = $device_model->type;
                     $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                     $amReponseParam['auth_token'] = $ssAuthToken;
                     $amReponseParam['login_type'] = $model->login_type;
@@ -187,7 +191,7 @@ class UsersController extends \yii\base\Controller
                 }
                 $device_model->setAttributes($amData['request_param']);
                 $device_model->device_tocken = $requestParam['device_id'];
-                $device_model->type = "1";
+                $device_model->type = $requestParam['device_type'];
                 $device_model->user_id = $model->id;
                 //  $device_model->created_at    = date( 'Y-m-d H:i:s' );
                 $device_model->save(false);
@@ -199,6 +203,7 @@ class UsersController extends \yii\base\Controller
                 $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
                 $amReponseParam['photo'] = !empty($model->photo) ? $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                 $amReponseParam['device_token'] = $device_model->device_tocken;
+                $amReponseParam['device_type'] = $device_model->type;
                 $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                 $amReponseParam['auth_token'] = $ssAuthToken;
                 $amReponseParam['login_type'] = $model->login_type;
@@ -225,7 +230,7 @@ class UsersController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('role', 'user_name', 'email', 'password', 'device_id', 'phone');
+        $amRequiredParams = array('role', 'user_name', 'email', 'password', 'device_id', 'device_type', 'phone');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -305,7 +310,7 @@ class UsersController extends \yii\base\Controller
 
             $device_model->setAttributes($amData['request_param']);
             $device_model->device_tocken = $requestParam['device_id'];
-            $device_model->type = 1;
+            $device_model->type = $requestParam['device_type'];
             $device_model->gcm_id = !empty($requestParam['gcm_registration_id']) ? $requestParam['gcm_registration_id'] : "";
             $device_model->user_id = $model->id;
             $device_model->save(false);
@@ -339,6 +344,7 @@ class UsersController extends \yii\base\Controller
             $amReponseParam['phone'] = $model->phone;
             $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
             $amReponseParam['device_token'] = $device_model->device_tocken;
+            $amReponseParam['device_type'] = $device_model->type;
             $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
             $amReponseParam['auth_token'] = $ssAuthToken;
 
