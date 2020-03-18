@@ -927,8 +927,8 @@ class UsersController extends \yii\base\Controller
         //Check User Status//
         Common::matchUserStatus($requestParam['user_id']);
         //VERIFY AUTH TOKEN
-        $authToken = Common::get_header('auth_token');
-        Common::checkAuthentication($authToken);
+        /*  $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);*/
         $oModelUser = Users::findOne($requestParam['user_id']);
         if (!empty($oModelUser)) {
             $deviceModel = DeviceDetails::find()->where(["user_id" => $requestParam['user_id']])->one();
