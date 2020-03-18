@@ -80,6 +80,7 @@ class RestaurantsController extends \yii\base\Controller
                         $ttt['avg_time'] = $time . "-" . $time2 . " mins";
 
                     }
+                    $ttt['distance'] = $distance;
                     $Feedbacks = Feedbacks::find()->select("AVG(rating) AS rating")->where(["restaurant_id" => $ttt['id']])->asArray()->all();
 
                     $ttt['feedback_rating'] = !empty($Feedbacks[0]['rating']) ? $Feedbacks[0]['rating'] : "0";
