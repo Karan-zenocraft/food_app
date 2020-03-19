@@ -11,6 +11,12 @@ $this->params['breadcrumbs'][] = ['label' => 'Restaurant Menus', 'url' => ['inde
 $this->params['breadcrumbs'][] = ['label' => $model->name . "- Update"];
 
 ?>
+<style type="text/css">
+    
+.nav-list li:nth-child(4), .nav-list li:nth-child(4) a:hover{background: #006dcc;}
+.nav-list li:nth-child(4) span, .nav-list li:nth-child(4) span:hover{color: #fff!important;}
+
+</style>
 <div class="restaurant-menu-update email-format-create">
 
     <?=$this->render('_form', [
