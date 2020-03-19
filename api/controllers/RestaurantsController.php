@@ -144,10 +144,10 @@ class RestaurantsController extends \yii\base\Controller
                         $amResponseData[] = $ttt;
                         return $amResponseData;
                     });
-
                     $restaurant[0]['restaurantGalleries'] = $amResponseData;
                 }
 
+                $restaurant[0]['photo'] = !empty($restaurant[0]['photo']) && file_exists(Yii::getAlias('@root') . '/' . "uploads/restaurants/" . $restaurant[0]['photo']) ? Yii::$app->params['root_url'] . '/' . "uploads/restaurants/" . $restaurant[0]['photo'] : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                 $menuCategories = $restaurant[0]['menuCategories'];
                 if (!empty($menuCategories)) {
                     array_walk($menuCategories, function ($arr) use (&$amResponseDataCategories) {
