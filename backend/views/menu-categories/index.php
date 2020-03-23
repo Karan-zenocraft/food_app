@@ -12,6 +12,13 @@ $this->title = 'Menu Categories';
 $this->params['breadcrumbs'][] = ['label' => 'Manage Restaurants', 'url' => ['restaurants/index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+
+<style type="text/css">
+    
+.nav-list li:nth-child(4), .nav-list li:nth-child(4) a:hover{background: #006dcc;}
+.nav-list li:nth-child(4) span, .nav-list li:nth-child(4) span:hover{color: #fff!important;}
+
+</style>
 <div class="menu-categories-index email-format-index">
  <div class="email-format-index">
     <div class="navbar navbar-inner block-header">

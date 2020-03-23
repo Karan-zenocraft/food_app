@@ -13,6 +13,13 @@ $this->params['breadcrumbs'][] = ['label' => 'Manage Menu Categories', 'url' => 
 $this->params['breadcrumbs'][] = ['label' => Common::get_name_by_id($_GET['cid'], "MenuCategories"), "url" => "#"];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+
+<style type="text/css">
+    
+.nav-list li:nth-child(4), .nav-list li:nth-child(4) a:hover{background: #006dcc;}
+.nav-list li:nth-child(4) span, .nav-list li:nth-child(4) span:hover{color: #fff!important;}
+
+</style>
 <div class="restaurant-menu-index email-format-index">
  <div class="email-format-index">
     <div class="navbar navbar-inner block-header">

@@ -240,7 +240,17 @@ $( document ).ready(function() {
         $('.open_search').click(function(){
             $('.restaurants-serach').toggle();
         });
+
+  //        $(".btn-small").click(function(){
+
+  //   $(".nav-list li").addClass("open active");
+  // });
+
+        
+    
     });
+
+
 /*function switchoff_restaurant(id){
       $("#"+id).toggleClass("switch2");
    if ($("#"+id).is(':checked')) {
