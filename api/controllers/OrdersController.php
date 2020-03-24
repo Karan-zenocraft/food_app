@@ -26,7 +26,7 @@ class OrdersController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'total_amount', 'transaction_id', 'payment_type', 'user_address_id');
+        $amRequiredParams = array('user_id', 'total_amount', 'transaction_id', 'payment_type', 'user_address_id', 'special_offer_id', 'discount', 'coupan_code', 'discounted_price', 'amount_with_tax_discount', 'delivery_charges', 'other_charges');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -51,6 +51,13 @@ class OrdersController extends \yii\base\Controller
             $order->status = Yii::$app->params['order_status']['placed'];
             $order->delivery_charges = $requestParam['delivery_charges'];
             $order->other_charges = $requestParam['other_charges'];
+            $order->special_offer_id = $requestParam['special_offer_id'];
+            $order->discount = $requestParam['discount'];
+            $order->coupan_code = $requestParam['coupan_code'];
+            $order->discounted_price = $requestParam['discounted_price'];
+            $order->amount_with_tax_discount = $requestParam['amount_with_tax_discount'];
+            $owner_charge = $order->discounted_price * 10 / 100;
+            $order->price_to_owner = $order->discounted_price - $owner_charge;
             $order->user_address_id = $requestParam['user_address_id'];
 
             if ($order->save(false)) {
