@@ -20,7 +20,7 @@ class PaymentController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'amount');
+        $amRequiredParams = array('user_id', 'amount_with_tax_discount');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -41,7 +41,7 @@ class PaymentController extends \yii\base\Controller
             \Stripe\Stripe::setApiKey('sk_test_Riw74aG5a5dBFs873VnuZRl600NA1l75zn');
 
             $intent = \Stripe\PaymentIntent::create([
-                'amount' => $requestParam['amount'],
+                'amount' => $requestParam['amount_with_tax_discount'],
                 'currency' => 'usd',
             ]);
             $client_secret = $intent->client_secret;

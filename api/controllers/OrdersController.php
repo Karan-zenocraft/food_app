@@ -51,9 +51,9 @@ class OrdersController extends \yii\base\Controller
             $order->status = Yii::$app->params['order_status']['placed'];
             $order->delivery_charges = $requestParam['delivery_charges'];
             $order->other_charges = $requestParam['other_charges'];
-            $order->special_offer_id = $requestParam['special_offer_id'];
-            $order->discount = $requestParam['discount'];
-            $order->coupan_code = $requestParam['coupan_code'];
+            $order->special_offer_id = !empty($requestParam['special_offer_id']) ? $requestParam['special_offer_id'] : "";
+            $order->discount = !empty($requestParam['discount']) ? $requestParam['discount'] : 0;
+            $order->coupan_code = !empty($requestParam['coupan_code']) ? $requestParam['coupan_code'] : "";
             $order->discounted_price = $requestParam['discounted_price'];
             $order->amount_with_tax_discount = $requestParam['amount_with_tax_discount'];
             $owner_charge = $order->discounted_price * 10 / 100;
