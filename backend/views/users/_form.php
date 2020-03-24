@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Restaurants;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -45,12 +46,16 @@ use yii\widgets\ActiveForm;
 <div class="span3 style_input_width">
       <?=$form->field($model, 'photo')->fileInput(['id' => 'photo', 'value' => $model->photo]);?>
 </div>
+   <div class="span3 style_input_width">
+    <?=$form->field($model, 'restaurant_id')->dropDownList(Restaurants::RestaurantsDropdown())?>
+  </div>
 </div>
       <div class="row">
-<div class="span3">
+<div class="span3 style_input_width">
     <img id="image" width="100px" hieght="100px" src="<?php echo ($model->login_type == "1") ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : $model->photo; ?>" alt="" />
     </div>
-</div>
+
+  </div>
     <div class="form-group">
         <?=Html::submitButton('Save', ['class' => 'btn btn-success'])?>
     </div>

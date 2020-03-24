@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\components\Common;
 use common\models\Restaurants;
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -41,7 +43,13 @@ class RestaurantsSearch extends Restaurants
      */
     public function search($params)
     {
-        $query = Restaurants::find();
+        $user_id = Yii::$app->user->id;
+        $role = Common::get_user_role($user_id, $flag = "1");
+        if ($role->role_id == Yii::$app->params['userroles']['admin']) {
+            $query = Restaurants::find()->where(['id' => $role->restaurant_id]);
+        } else {
+            $query = Restaurants::find();
+        }
 
         // add conditions that should always apply here
 

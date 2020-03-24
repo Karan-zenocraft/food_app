@@ -55,7 +55,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return [
             // [['role_id', 'status', 'restaurant_id', 'phone', 'login_type'], 'integer'],
             [['phone'], 'integer'],
-            [['role_id', 'user_name', 'email', 'status', 'password'], 'required'],
+            [['role_id', 'user_name', 'email', 'status', 'password', 'restaurant_id'], 'required'],
             [['email'], 'email'],
             ['user_name', 'validateUserName'],
             ['email', 'validateEmail'],
@@ -86,7 +86,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'restaurant_id' => 'Restaurant ID',
+            'restaurant_id' => 'Restaurant',
             'phone' => 'Contact No',
             'login_type' => 'Login Type',
         ];

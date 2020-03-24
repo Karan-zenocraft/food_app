@@ -40,15 +40,11 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 <div class="navbar navbar-inner block-header">
         <div class="muted pull-left"><?=Html::encode($this->title)?></div>
-        <?php $user_role = Common::get_user_role(Yii::$app->user->id, $flag = 0);
-
-if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
+        <?php $user_role = Common::get_user_role(Yii::$app->user->id, $flag = 0);?>
 
         <div class="pull-right">
         <?=Html::a(Yii::t('app', '<i class="icon-plus"></i> Add Offer'), ['create'], ['class' => 'btn btn-success'])?>
        </div>
-<?php }
-?>
     </div>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
   <div class="block-content">

@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\components\Common;
 use common\models\SpecialOffers;
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -40,8 +42,13 @@ class SpecialOffersSearch extends SpecialOffers
      */
     public function search($params)
     {
-        $query = SpecialOffers::find();
-
+        $user_id = Yii::$app->user->id;
+        $role = Common::get_user_role($user_id, $flag = "1");
+        if ($role->role_id == Yii::$app->params['userroles']['super_admin']) {
+            $query = SpecialOffers::find();
+        } else {
+            $query = SpecialOffers::find()->where("FIND_IN_SET(restaurant_id," . $role->restaurant_id . ") > 0");
+        }
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([

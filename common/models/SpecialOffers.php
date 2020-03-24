@@ -21,7 +21,7 @@ class SpecialOffers extends \common\models\base\SpecialOffersBase
             [['from_date', 'to_date', 'created_at', 'updated_at'], 'safe'],
             [['photo'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
             [['coupan_code'], 'string', 'max' => 255],
-            //[['restaurant_id'], 'exist', 'skipOnError' => true, 'targetClass' => Restaurants::className(), 'targetAttribute' => ['restaurant_id' => 'id']],
+            /* [['restaurant_id'], 'exist', 'skipOnError' => true, 'targetClass' => Restaurants::className(), 'targetAttribute' => ['restaurant_id' => 'id']],*/
         ];
     }
 

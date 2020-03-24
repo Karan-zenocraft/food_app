@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\components\AdminCoreController;
+use common\components\Common;
 use common\models\SpecialOffers;
 use common\models\SpecialOffersSearch;
 use Yii;
@@ -57,7 +58,13 @@ class SpecialOffersController extends AdminCoreController
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $postdata = Yii::$app->request->post();
-            $model->restaurant_id = implode(",", $postdata['SpecialOffers']['restaurant_id']);
+            $user_id = Yii::$app->user->id;
+            $role = Common::get_user_role($user_id, $flag = "1");
+            if ($role->role_id == Yii::$app->params['userroles']['super_admin']) {
+                $model->restaurant_id = implode(",", $postdata['SpecialOffers']['restaurant_id']);
+            } else {
+                $model->restaurant_id = $role->restaurant_id;
+            }
             $file = \yii\web\UploadedFile::getInstance($model, 'photo');
             if (!empty($file)) {
                 $file_name = $file->basename . "_" . uniqid() . "." . $file->extension;
@@ -89,7 +96,13 @@ class SpecialOffersController extends AdminCoreController
         $restaurants = explode(",", $model->restaurant_id);
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $postdata = Yii::$app->request->post();
-            $model->restaurant_id = implode(",", $postdata['SpecialOffers']['restaurant_id']);
+            $user_id = Yii::$app->user->id;
+            $role = Common::get_user_role($user_id, $flag = "1");
+            if ($role->role_id == Yii::$app->params['userroles']['super_admin']) {
+                $model->restaurant_id = implode(",", $postdata['SpecialOffers']['restaurant_id']);
+            } else {
+                $model->restaurant_id = $role->restaurant_id;
+            }
             $file = \yii\web\UploadedFile::getInstance($model, 'photo');
             if (!empty($file)) {
                 $delete = $model->oldAttributes['photo'];

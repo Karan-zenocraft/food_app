@@ -15,24 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="account-details-index email-format-index">
      <div class="email-format-index">
-    <div class="navbar navbar-inner block-header">
-        <div class="muted pull-left">Search Here</div>
-    </div>
-        <div class="block-content collapse in">
-        <div class="users-form span12">
 
-     <?=Html::a(Yii::t('app', '<i class="icon-filter icon-white"></i> Filter'), "javascript:void(0);", ['class' => 'btn btn-primary open_search']);?>
-     <?php if (!empty($_REQUEST['AccountDetailsSearch']) || (!empty($_GET['temp']) && $_GET['temp'] == "clear")) {?>
-        <div class="account-detailss-serach common_search">
-         <?php echo $this->render('_search', ['model' => $searchModel]); ?>
-        </div>
-<?php } else {?>
-    <div class="account-details-serach common_search">
-         <?php echo $this->render('_search', ['model' => $searchModel]); ?>
-        </div>
-    <?php }?>
-</div>
-</div>
 </div>
     <div class="navbar navbar-inner block-header">
         <div class="muted pull-left"><?=Html::encode($this->title)?></div>

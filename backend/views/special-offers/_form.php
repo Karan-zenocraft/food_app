@@ -1,5 +1,6 @@
 <?php
 
+use common\components\Common;
 use common\models\Restaurants;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
@@ -27,17 +28,23 @@ use yii\widgets\ActiveForm;
 /*p($restaurants, 0);
 p($val);*/
 $model->restaurant_id = explode(",", $model->restaurant_id);
-echo $form->field($model, 'restaurant_id')->widget(Select2::classname(), [
-    'value' => ['2' => 'american', '3' => 'asian', '4' => 'belgian'],
-    'data' => $restaurants,
-    'name' => 'restaurant_id',
-    'options' => ['placeholder' => 'Choose Type', 'multiple' => true],
-    'pluginOptions' => [
-        'tags' => false,
-        'tokenSeparators' => [',', ' '],
-        'maximumInputLength' => 10,
-    ],
-]);?>
+$user_id = Yii::$app->user->id;
+$role = Common::get_user_role($user_id, $flag = "1");
+if ($role->role_id == Yii::$app->params['userroles']['super_admin']) {
+    echo $form->field($model, 'restaurant_id')->widget(Select2::classname(), [
+        'value' => ['2' => 'american', '3' => 'asian', '4' => 'belgian'],
+        'data' => $restaurants,
+        'name' => 'restaurant_id',
+        'options' => ['placeholder' => 'Choose Type', 'multiple' => true],
+        'pluginOptions' => [
+            'tags' => false,
+            'tokenSeparators' => [',', ' '],
+            'maximumInputLength' => 10,
+        ],
+    ]);
+} else {?>
+   <?=$form->field($model, 'restaurant_id')->textInput(["value" => Common::get_name_by_id($role->restaurant_id, "Restaurants"), 'readonly' => 'true'])?>
+<?php }?>
 </div>
  <div class="span3">
     <?=$form->field($model, 'discount')->textInput()?>

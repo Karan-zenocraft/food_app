@@ -72,7 +72,6 @@ class UsersController extends AdminCoreController
     {
         $model = new Users();
         $UserRolesDropdown = ArrayHelper::map(UserRoles::find()->where("id !=" . Yii::$app->params['userroles']['customer'] . " AND id !=" . Yii::$app->params['userroles']['super_admin'])->asArray()->all(), 'id', 'role_name');
-
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->password = md5($_REQUEST['Users']['password']);
             $file = \yii\web\UploadedFile::getInstance($model, 'photo');
@@ -86,17 +85,32 @@ class UsersController extends AdminCoreController
             $model->generateAuthKey();
             $email_verify_link = Yii::$app->params['root_url'] . '/site/email-verify?verify=' . base64_encode($model->verification_code) . '&e=' . base64_encode($model->email);
             $model->save(false);
-            $emailformatemodel = EmailFormat::findOne(["title" => 'backend_registration', "status" => '1']);
-            if ($emailformatemodel) {
+            $login_url = "Login URL : " . Yii::$app->params['site_url'] . Yii::$app->params['login_url'];
+            if ($model->role_id == Yii::$app->params['userroles']['admin']) {
+                $emailformatemodel = EmailFormat::findOne(["title" => 'backend_registration', "status" => '1']);
+                if ($emailformatemodel) {
 
-                //create template file
-                $AreplaceString = array('{password}' => $_REQUEST['Users']['password'], '{username}' => $model->user_name, '{email}' => $model->email, '{role}' => $model->role->role_name);
+                    //create template file
+                    $AreplaceString = array('{password}' => $_REQUEST['Users']['password'], '{username}' => $model->user_name, '{email}' => $model->email, '{role}' => $model->role->role_name, '{login_url}' => $login_url);
 
-                $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
-                $ssSubject = $emailformatemodel->subject;
-                //send email for new generated password
-                $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
+                    $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
+                    $ssSubject = $emailformatemodel->subject;
+                    //send email for new generated password
+                    $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
+                }
+            } else {
+                $emailformatemodel = EmailFormat::findOne(["title" => 'user_registration', "status" => '1']);
+                if ($emailformatemodel) {
 
+                    //create template file
+                    $AreplaceString = array('{password}' => $_REQUEST['Users']['password'], '{username}' => $model->user_name, '{email}' => $model->email, '{email_verify_link}' => $email_verify_link);
+
+                    $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
+                    $ssSubject = $emailformatemodel->subject;
+                    //send email for new generated password
+                    $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
+
+                }
             }
             return $this->redirect(['users/index']);
 
