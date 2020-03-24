@@ -3,21 +3,21 @@
 namespace backend\controllers;
 
 use backend\components\AdminCoreController;
-use common\models\Restaurants;
-use common\models\RestaurantsSearch;
+use common\models\AccountDetails;
+use common\models\AccountDetailsSearch;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
 /**
- * RestaurantsController implements the CRUD actions for Restaurants model.
+ * AccountDetailsController implements the CRUD actions for AccountDetails model.
  */
-class RestaurantsController extends AdminCoreController
+class AccountDetailsController extends AdminCoreController
 {
     /**
      * {@inheritdoc}
      */
-    /*   public function behaviors()
+    /*public function behaviors()
     {
     return [
     'verbs' => [
@@ -27,15 +27,15 @@ class RestaurantsController extends AdminCoreController
     ],
     ],
     ];
-    }*/
-
+    }
+     */
     /**
-     * Lists all Restaurants models.
+     * Lists all AccountDetails models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new RestaurantsSearch();
+        $searchModel = new AccountDetailsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -45,7 +45,7 @@ class RestaurantsController extends AdminCoreController
     }
 
     /**
-     * Displays a single Restaurants model.
+     * Displays a single AccountDetails model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -58,27 +58,19 @@ class RestaurantsController extends AdminCoreController
     }
 
     /**
-     * Creates a new Restaurants model.
+     * Creates a new AccountDetails model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Restaurants();
+        $model = new AccountDetails();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $postdata = Yii::$app->request->post();
-            $model->restaurant_type = implode(",", $postdata['Restaurants']['restaurant_type']);
-            $file = \yii\web\UploadedFile::getInstance($model, 'photo');
-            if (!empty($file)) {
-                $file_name = $file->basename . "_" . uniqid() . "." . $file->extension;
-                //p(trim($file_name));
-                $file_filter = str_replace(" ", "", $file_name);
-                $model->photo = $file_filter;
-                $file->saveAs(Yii::getAlias('@root') . '/uploads/restaurants/' . $file_filter);
-            }
+            $model->restaurant_id = $_GET['rid'];
             $model->save(false);
-            return $this->redirect(['index']);
+            Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_add_message'));
+            return $this->redirect(['index', 'rid' => $model->restaurant_id]);
         }
 
         return $this->render('create', [
@@ -87,7 +79,7 @@ class RestaurantsController extends AdminCoreController
     }
 
     /**
-     * Updates an existing Restaurants model.
+     * Updates an existing AccountDetails model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -96,36 +88,21 @@ class RestaurantsController extends AdminCoreController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $old_image = $model->photo;
-        $restaurantTypes = explode(",", $model->restaurant_type);
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $postdata = Yii::$app->request->post();
-            $model->restaurant_type = implode(",", $postdata['Restaurants']['restaurant_type']);
-            $file = \yii\web\UploadedFile::getInstance($model, 'photo');
-            if (!empty($file)) {
-                $delete = $model->oldAttributes['photo'];
-                $file_name = $file->basename . "_" . uniqid() . "." . $file->extension;
-                $file_filter = str_replace(" ", "", $file_name);
-                if (!empty($old_image) && file_exists(Yii::getAlias('@root') . '/uploads/' . $old_image)) {
-                    unlink(Yii::getAlias('@root') . '/uploads/restaurants/' . $old_image);
-                }
-                $file->saveAs(Yii::getAlias('@root') . '/uploads/restaurants/' . $file_filter, false);
-                $model->photo = $file_filter;
-            } else {
-                $model->photo = $old_image;
-            }
+            $model->restaurant_id = $_GET['rid'];
             $model->save(false);
-            return $this->redirect(['index']);
+            Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_update_message'));
+            return $this->redirect(['index', 'rid' => $model->restaurant_id]);
         }
 
         return $this->render('update', [
             'model' => $model,
-            'restaurantTypes' => $restaurantTypes,
         ]);
     }
 
     /**
-     * Deletes an existing Restaurants model.
+     * Deletes an existing AccountDetails model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -139,15 +116,15 @@ class RestaurantsController extends AdminCoreController
     }
 
     /**
-     * Finds the Restaurants model based on its primary key value.
+     * Finds the AccountDetails model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Restaurants the loaded model
+     * @return AccountDetails the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Restaurants::findOne($id)) !== null) {
+        if (($model = AccountDetails::findOne($id)) !== null) {
             return $model;
         }
 

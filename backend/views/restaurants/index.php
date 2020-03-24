@@ -158,7 +158,7 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
             'class' => 'yii\grid\ActionColumn',
             'headerOptions' => ["style" => "width:40%;"],
             'contentOptions' => ["style" => "width:40%;"],
-            'template' => '{update}{manage_categories}{manage_feedbacks}{manage_gallery}{delete}',
+            'template' => '{update}{manage_categories}{manage_account_details}{manage_feedbacks}{manage_gallery}{delete}',
             'buttons' => [
                 'update' => function ($url, $model) {
                     $flag = 1;
@@ -182,6 +182,13 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                     $title = "manage Restaurant's Categories";
                     $flag = 3;
                     $url = Yii::$app->urlManager->createUrl(['menu-categories/index', 'rid' => $model->id]);
+                    return Common::template_view_gallery_button($url, $model, $title, $flag);
+
+                },
+                'manage_account_details' => function ($url, $model) {
+                    $title = "Manage Restaurant's Account Details";
+                    $flag = 4;
+                    $url = Yii::$app->urlManager->createUrl(['account-details/index', 'rid' => $model->id]);
                     return Common::template_view_gallery_button($url, $model, $title, $flag);
 
                 },
@@ -246,8 +253,8 @@ $( document ).ready(function() {
   //   $(".nav-list li").addClass("open active");
   // });
 
-        
-    
+
+
     });
 
 
