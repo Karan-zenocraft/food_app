@@ -208,6 +208,8 @@ class OrdersController extends \yii\base\Controller
                 });
                 $orderDetails[0]['orderMenus'] = $menus;
                 $orderDetails[0]['restaurant_name'] = $menus[0]['restaurant_name'];
+                $orderDetails[0]['special_offer_id'] = !empty($orderDetails[0]['special_offer_id']) ? $orderDetails[0]['special_offer_id'] : "";
+                $orderDetails[0]['coupan_code'] = !empty($orderDetails[0]['coupan_code']) ? $orderDetails[0]['coupan_code'] : "";
                 $amReponseParam = $orderDetails;
                 $ssMessage = 'Orders Details';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
