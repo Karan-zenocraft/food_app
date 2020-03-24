@@ -5,6 +5,7 @@ namespace common\models\base;
 use common\models\OrderMenus;
 use common\models\OrderPayment;
 use common\models\SpecialOffers;
+use common\models\UserAddress;
 use common\models\UserFavouriteOrders;
 use common\models\Users;
 use Yii;
@@ -109,6 +110,11 @@ class OrdersBase extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(Users::className(), ['id' => 'user_id']);
+    }
+
+    public function getUserAddress()
+    {
+        return $this->hasOne(UserAddress::className(), ['id' => 'user_address_id']);
     }
 
     /**
