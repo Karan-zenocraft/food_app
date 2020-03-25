@@ -108,7 +108,9 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                     $title = "Accept Order";
                     $flag = 1;
                     $url = Yii::$app->urlManager->createUrl(['orders/accept-order', 'order_id' => $model->id]);
-                    return Common::template_update_permission_button($url, $model, $title, $flag);
+                    $user_id = Yii::$app->user->id;
+                    $role = Common::get_user_role($user_id, $flag = "1");
+                    return ($role->role_id == Yii::$app->params['userroles']['super_admin']) ? "" : Common::template_update_permission_button($url, $model, $title, $flag);
 
                 },
 
