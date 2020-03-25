@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\DeviceDetails;
+use common\models\DriverDocuments;
 use common\models\NotificationList;
 use common\models\Restaurants;
 use common\models\UserAddress;
@@ -77,6 +78,11 @@ class Users extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'restaurant_id' => 'Restaurant ID',
         ];
+    }
+
+    public function getDriverDocuments()
+    {
+        return $this->hasMany(DriverDocuments::className(), ['user_id' => 'id']);
     }
     public function getRestaurant()
     {

@@ -26,7 +26,7 @@ class OrdersController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'total_amount', 'transaction_id', 'payment_type', 'user_address_id', 'special_offer_id', 'discount', 'coupan_code', 'discounted_price', 'amount_with_tax_discount', 'delivery_charges', 'other_charges');
+        $amRequiredParams = array('user_id', 'total_amount', 'transaction_id', 'payment_type', 'user_address_id', 'special_offer_id', 'discount', 'coupan_code', 'discounted_price', 'amount_with_tax_discount', 'delivery_charges', 'other_charges', 'restaurant_id');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -46,6 +46,7 @@ class OrdersController extends \yii\base\Controller
         if (!empty($model)) {
             $order = new Orders();
             $order->user_id = $snUserId;
+            $order->restaurant_id = $requestParam['restaurant_id'];
             $order->payment_type = $requestParam['payment_type'];
             $order->total_amount = $requestParam['total_amount'];
             $order->status = Yii::$app->params['order_status']['placed'];
@@ -132,6 +133,7 @@ class OrdersController extends \yii\base\Controller
                 array_walk($orderList, function ($arr) use (&$amResponseData, $favouriteOrders_arr) {
                     $ttt = $arr;
                     $ttt['is_favourite'] = in_array($ttt['id'], $favouriteOrders_arr) ? "true" : "false";
+                    $ttt['restaurant_id'] = !empty($ttt['restaurant_id']) ? $ttt['restaurant_id'] : "";
                     $orderMenus = $ttt['orderMenus'];
                     array_walk($orderMenus, function ($arr) use (&$menus, $favouriteOrders_arr) {
                         $ttt = $arr;
@@ -209,6 +211,7 @@ class OrdersController extends \yii\base\Controller
                 $orderDetails[0]['orderMenus'] = $menus;
                 $orderDetails[0]['restaurant_name'] = $menus[0]['restaurant_name'];
                 $orderDetails[0]['special_offer_id'] = !empty($orderDetails[0]['special_offer_id']) ? $orderDetails[0]['special_offer_id'] : "";
+                $orderDetails[0]['restaurant_id'] = !empty($orderDetails[0]['restaurant_id']) ? $orderDetails[0]['restaurant_id'] : "";
                 $orderDetails[0]['coupan_code'] = !empty($orderDetails[0]['coupan_code']) ? $orderDetails[0]['coupan_code'] : "";
                 $amReponseParam = $orderDetails;
                 $ssMessage = 'Orders Details';
