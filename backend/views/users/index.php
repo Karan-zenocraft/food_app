@@ -113,11 +113,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'headerOptions' => ["style" => "width:40%;"],
             'contentOptions' => ["style" => "width:40%;"],
-            'template' => '{update}{delete}',
+            'template' => '{update}{manage_documents}{delete}',
             'buttons' => [
                 'update' => function ($url, $model) {
                     $flag = 1;
                     return Common::template_update_button($url, $model, $flag);
+                },
+                'manage_documents' => function ($url, $model) {
+                    $title = "Manage Documents";
+                    $flag = 4;
+                    $url = Yii::$app->urlManager->createUrl(['driver-documents/index', 'uid' => $model->id]);
+                    return Common::template_view_gallery_button($url, $model, $title, $flag);
+
                 },
                 'delete' => function ($url, $model) {
                     $flag = 1;
