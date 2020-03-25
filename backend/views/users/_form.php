@@ -47,7 +47,7 @@ use yii\widgets\ActiveForm;
       <?=$form->field($model, 'photo')->fileInput(['id' => 'photo', 'value' => $model->photo]);?>
 </div>
    <div class="span3 style_input_width">
-    <?=$form->field($model, 'restaurant_id')->dropDownList(Restaurants::RestaurantsDropdown())?>
+    <?=$form->field($model, 'restaurant_id')->dropDownList(array("" => "") + Restaurants::RestaurantsDropdown())?>
   </div>
 </div>
       <div class="row">
@@ -68,6 +68,19 @@ use yii\widgets\ActiveForm;
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
 <script type="text/javascript">
  $( document ).ready(function(){
+    if($("#users-role_id").val() == 2){
+      $(".field-users-restaurant_id").show();
+  }else{
+      $(".field-users-restaurant_id").hide();
+  }
+  $('#users-role_id').change(function() {
+    var role_id = $(this).val();
+    if(role_id == 2){
+      $(".field-users-restaurant_id").show();
+    }else{
+      $(".field-users-restaurant_id").hide();
+    }
+  });
         $("#photo").change(function() {
         readURL(this);
         });

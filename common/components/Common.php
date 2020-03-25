@@ -1146,7 +1146,7 @@ class Common
     public static function get_user_role($id, $flag)
     {
         $omUsers = Users::find()->where(['id' => $id])->one();
-        if (!empty($flag) && $flag = "1") {
+        if (!empty($flag) && $flag == "1") {
             return !empty($omUsers) ? $omUsers : '-';
         } else {
             return !empty($omUsers) ? $omUsers->role_id : '-';

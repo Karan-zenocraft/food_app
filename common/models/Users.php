@@ -55,7 +55,12 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return [
             // [['role_id', 'status', 'restaurant_id', 'phone', 'login_type'], 'integer'],
             [['phone'], 'integer'],
-            [['role_id', 'user_name', 'email', 'status', 'password', 'restaurant_id'], 'required'],
+            [['role_id', 'user_name', 'email', 'status', 'password'], 'required'],
+            [['restaurant_id'], 'required', 'when' => function ($model) {
+                return $model->role_id == 2;
+            }, 'whenClient' => "function (attribute, value) {
+                return $('#users-role_id').val() == 2;
+            }"],
             [['email'], 'email'],
             ['user_name', 'validateUserName'],
             ['email', 'validateEmail'],

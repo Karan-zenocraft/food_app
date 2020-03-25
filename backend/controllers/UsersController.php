@@ -170,7 +170,8 @@ class UsersController extends AdminCoreController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        $model->delete();
 
         return $this->redirect(['index']);
     }
