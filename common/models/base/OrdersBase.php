@@ -4,6 +4,7 @@ namespace common\models\base;
 
 use common\models\OrderMenus;
 use common\models\OrderPayment;
+use common\models\Restaurants;
 use common\models\SpecialOffers;
 use common\models\UserAddress;
 use common\models\UserFavouriteOrders;
@@ -56,7 +57,7 @@ class OrdersBase extends \yii\db\ActiveRecord
             [['user_id', 'special_offer_id', 'user_address_id', 'status'], 'integer'],
             [['payment_type'], 'string'],
             [['total_amount', 'delivery_charges', 'other_charges', 'discount', 'discounted_price', 'amount_with_tax_discount', 'price_to_owner'], 'number'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'restaurant_id'], 'safe'],
             [['coupan_code'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
             [['special_offer_id'], 'exist', 'skipOnError' => true, 'targetClass' => SpecialOffers::className(), 'targetAttribute' => ['special_offer_id' => 'id']],
@@ -87,7 +88,10 @@ class OrdersBase extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
-
+    public function getRestaurant()
+    {
+        return $this->hasOne(Restaurants::className(), ['id' => 'restaurant_id']);
+    }
     /**
      * @return \yii\db\ActiveQuery
      */

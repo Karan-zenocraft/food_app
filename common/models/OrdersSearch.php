@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\components\Common;
 use common\models\Orders;
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
@@ -41,8 +43,13 @@ class OrdersSearch extends Orders
      */
     public function search($params)
     {
-        $query = Orders::find();
-
+        $user_id = Yii::$app->user->id;
+        $role = Common::get_user_role($user_id, $flag = "1");
+        if ($role->role_id == Yii::$app->params['userroles']['super_admin']) {
+            $query = Orders::find();
+        } else {
+            $query = Orders::find()->where(['orders.restaurant_id' => $role->restaurant_id]);
+        }
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
