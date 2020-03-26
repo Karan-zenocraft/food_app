@@ -13,7 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style type="text/css">
-    
+
 .nav-list li:nth-child(4), .nav-list li:nth-child(4) a:hover{background: #006dcc;}
 .nav-list li:nth-child(4) span, .nav-list li:nth-child(4) span:hover{color: #fff!important;}
 
