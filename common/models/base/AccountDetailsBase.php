@@ -39,7 +39,7 @@ class AccountDetailsBase extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['stripe_bank_account_holder_name', 'stripe_bank_account_holder_type', 'stripe_bank_routing_number', 'stripe_bank_account_number'], 'required'],
+            [['stripe_bank_account_holder_name', 'stripe_bank_account_holder_type', 'stripe_bank_routing_number', 'stripe_bank_account_number', 'stripe_email', 'paypal_email'], 'required'],
             [['restaurant_id', 'stripe_bank_routing_number', 'stripe_bank_account_number'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['paypal_email', 'stripe_bank_account_holder_name', 'stripe_bank_account_holder_type', 'stripe_bank_token', 'stripe_connect_account_id', 'stripe_bank_accout_id'], 'string', 'max' => 255],

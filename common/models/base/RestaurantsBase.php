@@ -2,13 +2,16 @@
 
 namespace common\models\base;
 
+use common\models\AccountDetails;
 use common\models\Feedbacks;
 use common\models\MenuCategories;
+use common\models\OrderMenus;
+use common\models\Orders;
+use common\models\RestaurantGallery;
 use common\models\RestaurantMenu;
-use common\models\RestaurantsGallery;
 use common\models\RestaurantsQuery;
-use common\models\RestaurantType;
 use common\models\RestaurantWorkingHours;
+use common\models\Users;
 use Yii;
 
 /**
@@ -89,6 +92,10 @@ class RestaurantsBase extends \yii\db\ActiveRecord
             'email' => 'Email',
         ];
     }
+    public function getAccountDetails()
+    {
+        return $this->hasMany(AccountDetails::className(), ['restaurant_id' => 'id']);
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -119,7 +126,18 @@ class RestaurantsBase extends \yii\db\ActiveRecord
     {
         return $this->hasMany(RestaurantMenu::className(), ['restaurant_id' => 'id']);
     }
-
+    public function getOrderMenus()
+    {
+        return $this->hasMany(OrderMenus::className(), ['restaurant_id' => 'id']);
+    }
+    public function getOrders()
+    {
+        return $this->hasMany(Orders::className(), ['restaurant_id' => 'id']);
+    }
+    public function getUsers()
+    {
+        return $this->hasMany(Users::className(), ['restaurant_id' => 'id']);
+    }
     /**
      * @return \yii\db\ActiveQuery
      */

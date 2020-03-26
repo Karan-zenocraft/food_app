@@ -67,9 +67,65 @@ class AccountDetailsController extends AdminCoreController
         $model = new AccountDetails();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $post = Yii::$app->request->post();
+            $postData = $post['AccountDetails'];
             $model->restaurant_id = $_GET['rid'];
-            $model->save(false);
-            Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_add_message'));
+            // Generate Stripe Bank account and connect account from the data
+            \Stripe\Stripe::setApiKey("sk_test_ZBaRU0wL5z8YaEEPUhY3jzgF00tdHXg5cp");
+            try {
+                // first create bank token
+                $bankToken = \Stripe\Token::create([
+                    'bank_account' => [
+                        'country' => 'US',
+                        'currency' => 'usd',
+                        'account_holder_name' => $postData['stripe_bank_account_holder_name'],
+                        'account_holder_type' => $postData['stripe_bank_account_holder_type'],
+                        'routing_number' => $postData['stripe_bank_routing_number'],
+                        'account_number' => $postData['stripe_bank_account_number'],
+                    ],
+                ]);
+
+                $account_holder_name = explode(" ", $postData['stripe_bank_account_holder_name']);
+                $first_name = $account_holder_name[0];
+                $last_name = $account_holder_name[1];
+                // second create stripe account
+                $stripeAccount = \Stripe\Account::create([
+                    "type" => "custom",
+                    "country" => "US",
+                    "email" => $postData['stripe_email'],
+                    "business_type" => "individual",
+                    "business_profile" => [
+                        "url" => "http://www.zenocraft.com",
+                    ],
+                    "individual" => [
+                        "first_name" => $first_name,
+                        "last_name" => $last_name,
+                    ],
+                    "requested_capabilities" => ['transfers'],
+                ]);
+
+                // third link the bank account with the stripe account
+                $bankAccount = \Stripe\Account::createExternalAccount(
+                    $stripeAccount->id, ['external_account' => $bankToken->id]
+                );
+                // Fourth stripe account update for tos acceptance
+                \Stripe\Account::update(
+                    $stripeAccount->id, [
+                        'tos_acceptance' => [
+                            'date' => time(),
+                            'ip' => $_SERVER['REMOTE_ADDR'], // Assumes you're not using a proxy
+                        ],
+                    ]
+                );
+                $response = ["bankToken" => $bankToken->id, "stripeAccount" => $stripeAccount->id, "bankAccount" => $bankAccount->id];
+                $model->stripe_bank_token = $response['bankToken'];
+                $model->stripe_connect_account_id = $response['stripeAccount'];
+                $model->stripe_bank_accout_id = $response['bankAccount'];
+                $model->save(false);
+                Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_add_message'));
+            } catch (\Exception $e) {
+                Yii::$app->session->setFlash('error', "Something went wrong for creating stripe account please try again later");
+            }
             return $this->redirect(['index', 'rid' => $model->restaurant_id]);
         }
 
@@ -89,11 +145,80 @@ class AccountDetailsController extends AdminCoreController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $model->restaurant_id = $_GET['rid'];
-            $model->save(false);
-            Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_update_message'));
-            return $this->redirect(['index', 'rid' => $model->restaurant_id]);
+        if (!empty(Yii::$app->request->post()) && $model->validate()) {
+            $post = Yii::$app->request->post();
+            $postData = $post['AccountDetails'];
+            if (($model->stripe_email != $postData['stripe_email']) || ($model->stripe_bank_account_holder_name != $postData['stripe_bank_account_holder_name']) || ($model->stripe_bank_account_holder_type != $postData['stripe_bank_account_holder_type']) || ($model->stripe_bank_routing_number != $postData['stripe_bank_routing_number']) || ($model->stripe_bank_account_number != $postData['stripe_bank_account_number'])) {
+                \Stripe\Stripe::setApiKey("sk_test_ZBaRU0wL5z8YaEEPUhY3jzgF00tdHXg5cp");
+                try {
+                    // first create bank token
+                    $bankToken = \Stripe\Token::create([
+                        'bank_account' => [
+                            'country' => 'US',
+                            'currency' => 'usd',
+                            'account_holder_name' => $postData['stripe_bank_account_holder_name'],
+                            'account_holder_type' => $postData['stripe_bank_account_holder_type'],
+                            'routing_number' => $postData['stripe_bank_routing_number'],
+                            'account_number' => $postData['stripe_bank_account_number'],
+                        ],
+                    ]);
+
+                    $account_holder_name = explode(" ", $postData['stripe_bank_account_holder_name']);
+                    $first_name = $account_holder_name[0];
+                    $last_name = $account_holder_name[1];
+                    // second create stripe account
+                    $stripeAccount = \Stripe\Account::create([
+                        "type" => "custom",
+                        "country" => "US",
+                        "email" => $postData['stripe_email'],
+                        "business_type" => "individual",
+                        "business_profile" => [
+                            "url" => "http://www.zenocraft.com",
+                        ],
+                        "individual" => [
+                            "first_name" => $first_name,
+                            "last_name" => $last_name,
+                        ],
+                        "requested_capabilities" => ['transfers'],
+                    ]);
+
+                    // third link the bank account with the stripe account
+                    $bankAccount = \Stripe\Account::createExternalAccount(
+                        $stripeAccount->id, ['external_account' => $bankToken->id]
+                    );
+                    // Fourth stripe account update for tos acceptance
+                    \Stripe\Account::update(
+                        $stripeAccount->id, [
+                            'tos_acceptance' => [
+                                'date' => time(),
+                                'ip' => $_SERVER['REMOTE_ADDR'], // Assumes you're not using a proxy
+                            ],
+                        ]
+                    );
+                    $response = ["bankToken" => $bankToken->id, "stripeAccount" => $stripeAccount->id, "bankAccount" => $bankAccount->id];
+                    $model->stripe_bank_token = $response['bankToken'];
+                    $model->stripe_connect_account_id = $response['stripeAccount'];
+                    $model->stripe_bank_accout_id = $response['bankAccount'];
+                    $model->restaurant_id = $_GET['rid'];
+                    $model->paypal_email = $postData['paypal_email'];
+                    $model->stripe_email = $postData['stripe_email'];
+                    $model->stripe_bank_account_holder_name = $postData['stripe_bank_account_holder_name'];
+                    $model->stripe_bank_account_holder_name = $postData['stripe_bank_account_holder_name'];
+                    $model->stripe_bank_account_holder_type = $postData['stripe_bank_account_holder_type'];
+                    $model->stripe_bank_routing_number = $postData['stripe_bank_routing_number'];
+                    $model->stripe_bank_account_number = $postData['stripe_bank_account_number'];
+                    $model->save(false);
+                    Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_update_message'));
+                    return $this->redirect(['index', 'rid' => $model->restaurant_id]);
+                } catch (\Exception $e) {
+                    Yii::$app->session->setFlash('error', "Something went wrong for creating stripe account please try again later");
+                    return $this->redirect(['index', 'rid' => $model->restaurant_id]);
+                }
+            } else {
+                $model->save(false);
+                Yii::$app->session->setFlash('success', Yii::getAlias('@account_details_update_message'));
+                return $this->redirect(['index', 'rid' => $model->restaurant_id]);
+            }
         }
 
         return $this->render('update', [

@@ -27,6 +27,11 @@ use yii\widgets\ActiveForm;
     <?=$form->field($model, 'paypal_email')->textInput(['maxlength' => true])?>
 </div>
 </div>
+<div class="row">
+    <div class="span3">
+    <?=$form->field($model, 'stripe_email')->textInput(['maxlength' => true])?>
+</div>
+</div>
  <div class="row">
     <div class="span3">
     <?=$form->field($model, 'stripe_bank_account_holder_name')->textInput(['maxlength' => true])?>
