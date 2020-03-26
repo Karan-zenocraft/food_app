@@ -74,16 +74,17 @@ class DeliveryboyController extends \yii\base\Controller
                 $ssMessage = 'successfully login.';
                 $amReponseParam['email'] = $model->email;
                 $amReponseParam['user_id'] = $model->id;
-                $amReponseParam['role'] = $model->role_id;
+                $amReponseParam['role'] = "$model->role_id";
                 $amReponseParam['user_name'] = $model->user_name;
-                $amReponseParam['phone'] = !empty($model->phone) ? $model->phone : "";
+                $amReponseParam['phone'] = !empty($model->phone) ? "$model->phone" : "";
                 $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
                 $amReponseParam['device_token'] = $device_model->device_tocken;
                 $amReponseParam['device_type'] = $device_model->type;
                 $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
                 $amReponseParam['auth_token'] = $ssAuthToken;
                 $amReponseParam['login_type'] = $model->login_type;
-                $amResponse = Common::successResponse($ssMessage, array_map('strval', $amReponseParam));
+                $amReponseParam['documents'] = DriverDocuments::find()->where(['user_id' => $model->id])->asArray()->all();
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             }
         } else {
             $ssMessage = 'Invalid email OR password.';
