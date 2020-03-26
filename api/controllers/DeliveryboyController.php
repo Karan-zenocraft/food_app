@@ -182,8 +182,6 @@ class DeliveryboyController extends \yii\base\Controller
             $model->photo->saveAs(__DIR__ . "../../../uploads/" . $OriginalModifier . '.' . $model->photo->extension);
             $model->photo = $OriginalModifier . '.' . $Extension;
         }
-        // p($requestFileparam['documents']);
-
         if ($model->save(false)) {
             if (isset($requestFileparam['documents']['name'])) {
                 foreach ($requestFileparam['documents']['name'] as $key => $name) {
@@ -197,6 +195,7 @@ class DeliveryboyController extends \yii\base\Controller
                     $documentModel->document_photo->saveAs(__DIR__ . "../../../uploads/documents/" . $OriginalModifier . '.' . $documentModel->document_photo->extension);
                     $filename = $OriginalModifier . '.' . $Extension;
                     $documentModel->document_photo = $filename;
+                    //$documentModel->document_name =
                     $documentModel->document_photo_url = Yii::$app->params['root_url'] . '/' . "uploads/documents/" . $filename;
                     $documentModel->save(false);
                     $documentsPhotos[] = $documentModel;
