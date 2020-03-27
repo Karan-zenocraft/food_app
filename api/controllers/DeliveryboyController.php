@@ -612,8 +612,10 @@ class DeliveryboyController extends \yii\base\Controller
 
         $requestParam = $amData['request_param'];
         //Check User Status//
+        Common::matchRole($requestParam['user_id']);
         Common::matchUserStatus($requestParam['user_id']);
         Common::matchDeliveryBoyStatus($requestParam['user_id']);
+
         //VERIFY AUTH TOKEN
         $authToken = Common::get_header('auth_token');
         Common::checkAuthentication($authToken);
@@ -624,7 +626,7 @@ class DeliveryboyController extends \yii\base\Controller
         $radius = 20;
         if (!empty($model)) {
 
-            $orders = Orders::find()->select("orders.user_id,orders.restaurant_id,user_address.lat,user_address.long,user_address.address,user_address.area") /*->with(['user' => function ($q) {
+            $orders = Orders::find()->select("orders.id,orders.user_id,orders.restaurant_id,user_address.lat,user_address.long,user_address.address,user_address.area") /*->with(['user' => function ($q) {
             return $q->select("user_name");
             }])->with(['restaurant' => function ($q) {
             return $q->select("name,area,city,address,pincode,lattitude,longitude");
@@ -633,35 +635,42 @@ class DeliveryboyController extends \yii\base\Controller
             /* with(['userAddress' => function ($q) use ($user_latitude, $user_longitude, $radius) {
             return $q->where("round(( 3959 * acos( least(1.0,cos( radians(" . $user_latitude . ") ) * cos( radians(`lat`) ) * cos( radians(`long`) - radians(" . $user_longitude . ") ) + sin( radians(" . $user_latitude . ") ) * sin( radians(`lat`))))), 1) < " . $radius . "");
             }])->asArray()->all();*/
-            array_walk($orders, function ($arr) use (&$amResponseData) {
-                $ttt = $arr;
-                $ttt['user_name'] = Common::get_user_name($ttt['user_id']);
-                $ttt['user_address'] = $ttt['address'];
-                $ttt['user_area'] = $ttt['area'];
-                $ttt['user_lat'] = $ttt['lat'];
-                $ttt['user_long'] = $ttt['long'];
-                $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
-                $ttt['restaurant_name'] = $restaurant->name;
-                $ttt['restaurant_lat'] = $restaurant->lattitude;
-                $ttt['restaurant_long'] = $restaurant->longitude;
-                $ttt['restaurant_area'] = $restaurant->area;
-                $ttt['restaurant_city'] = $restaurant->city;
-                $ttt['restaurant_address'] = $restaurant->address;
-                $ttt['restaurant_pincode'] = $restaurant->pincode;
-                unset($ttt['user_id']);
-                unset($ttt['restaurant_id']);
-                unset($ttt['lat']);
-                unset($ttt['long']);
-                unset($ttt['area']);
-                unset($ttt['address']);
-                $amResponseData[] = $ttt;
+            if (!empty($orders)) {
+                array_walk($orders, function ($arr) use (&$amResponseData) {
+                    $ttt = $arr;
+                    $ttt['user_name'] = Common::get_user_name($ttt['user_id']);
+                    $ttt['user_address'] = $ttt['address'];
+                    $ttt['user_area'] = $ttt['area'];
+                    $ttt['user_lat'] = $ttt['lat'];
+                    $ttt['user_long'] = $ttt['long'];
+                    $restaurant = Restaurants::find()->where(['id' => $ttt['restaurant_id']])->one();
+                    $ttt['restaurant_name'] = $restaurant->name;
+                    $ttt['restaurant_lat'] = $restaurant->lattitude;
+                    $ttt['restaurant_long'] = $restaurant->longitude;
+                    $ttt['restaurant_area'] = $restaurant->area;
+                    $ttt['restaurant_city'] = $restaurant->city;
+                    $ttt['restaurant_address'] = $restaurant->address;
+                    $ttt['restaurant_pincode'] = $restaurant->pincode;
+                    unset($ttt['user_id']);
+                    unset($ttt['restaurant_id']);
+                    unset($ttt['lat']);
+                    unset($ttt['long']);
+                    unset($ttt['area']);
+                    unset($ttt['address']);
+                    $amResponseData[] = $ttt;
 
-                return $amResponseData;
-            });
-            $amReponseParam = $amResponseData;
-            // Device Registration
-            $ssMessage = 'Orders List';
-            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                    return $amResponseData;
+                });
+                $amReponseParam = $amResponseData;
+                // Device Registration
+                $ssMessage = 'Orders List';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $amReponseParam = [];
+                // Device Registration
+                $ssMessage = 'Orders List';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
         } else {
             $ssMessage = 'Invalid User.';
             $amResponse = Common::errorResponse($ssMessage);
@@ -677,7 +686,7 @@ class DeliveryboyController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'status');
+        $amRequiredParams = array('user_id', 'order_id');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -688,7 +697,9 @@ class DeliveryboyController extends \yii\base\Controller
 
         $requestParam = $amData['request_param'];
         //Check User Status//
+        Common::matchRole($requestParam['user_id']);
         Common::matchUserStatus($requestParam['user_id']);
+        Common::matchDeliveryBoyStatus($requestParam['user_id']);
 
         //VERIFY AUTH TOKEN
         $authToken = Common::get_header('auth_token');
@@ -702,6 +713,52 @@ class DeliveryboyController extends \yii\base\Controller
             // Device Registration
             $ssMessage = 'Status update successfully';
             $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionAcceptOrder()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'order_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $order = Orders::find()->where(['id' => $requestParam['order_id']])->one();
+            if (!empty($order)) {
+                $order->delivery_person = $snUserId;
+                $amReponseParam = $order;
+                $ssMessage = 'Status update successfully';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $ssMessage = 'Invalid Order.';
+                $amResponse = Common::successResponse($ssMessage, []);
+            }
+            // Device Registration
         } else {
             $ssMessage = 'Invalid User.';
             $amResponse = Common::errorResponse($ssMessage);

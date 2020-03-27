@@ -1734,6 +1734,22 @@ class Common
             Common::encodeResponseJSON($WholeMealData);
         }
     }
+    public static function matchRole($id)
+    {
+
+        if (($model = Users::findOne($id)) !== null) {
+            if ($model->role_id != Yii::$app->params['userroles']['delivery_boy']) {
+                $ssMessage = 'You are not Authorize.';
+                $WholeMealData = Common::negativeResponse($ssMessage);
+                Common::encodeResponseJSON($WholeMealData);
+            }
+        } else {
+            $ssMessage = 'User is not available';
+            $WholeMealData = Common::negativeResponse($ssMessage);
+            Common::encodeResponseJSON($WholeMealData);
+        }
+    }
+
     public static function matchDeliveryBoyStatus($id)
     {
 
