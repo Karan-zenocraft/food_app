@@ -1734,6 +1734,21 @@ class Common
             Common::encodeResponseJSON($WholeMealData);
         }
     }
+    public static function matchDeliveryBoyStatus($id)
+    {
+
+        if (($model = Users::findOne($id)) !== null) {
+            if ($model->status_delivery_boy == Yii::$app->params['user_status_value']['in_active']) {
+                $ssMessage = 'You are offline. Please come online';
+                $WholeMealData = Common::successResponse($ssMessage, []);
+                Common::encodeResponseJSON($WholeMealData);
+            }
+        } else {
+            $ssMessage = 'User is not available';
+            $WholeMealData = Common::negativeResponse($ssMessage);
+            Common::encodeResponseJSON($WholeMealData);
+        }
+    }
     public static function checkRestaurantStatus($restaurant_id)
     {
         $valid = 0;

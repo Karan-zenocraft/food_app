@@ -50,7 +50,7 @@ class Users extends \yii\db\ActiveRecord
             [['role_id', 'badge_count', 'status', 'restaurant_id'], 'integer'],
             [['verification_code', 'password_reset_token', 'auth_token'], 'required'],
             [['is_code_verified', 'password_reset_token'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'status_delivery_boy'], 'safe'],
             [['user_name', 'email', 'password', 'photo', 'verification_code', 'auth_token'], 'string', 'max' => 255],
             [['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRoles::className(), 'targetAttribute' => ['role_id' => 'id']],
         ];
@@ -74,6 +74,7 @@ class Users extends \yii\db\ActiveRecord
             'auth_token' => 'Auth Token',
             'badge_count' => 'Badge Count',
             'status' => 'Status',
+            'status_delivery_boy' => 'Delivery Boy Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'restaurant_id' => 'Restaurant ID',
