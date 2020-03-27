@@ -755,7 +755,7 @@ class DeliveryboyController extends \yii\base\Controller
             if (!empty($order)) {
                 $order->delivery_person = $snUserId;
                 $amReponseParam = $order;
-                $ssMessage = 'Status update successfully';
+                $ssMessage = 'Order accepted successfully';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             } else {
                 $ssMessage = 'Invalid Order.';
