@@ -770,4 +770,56 @@ class DeliveryboyController extends \yii\base\Controller
         Common::encodeResponseJSON($amResponse);
     }
 
+    public function actionGetOrderDetails()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'order_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $order = Orders::find()->with(['user' => function ($q) {
+                return $q->select('phone,user_name');
+            }])->with('orderMenus')->with(['restaurant' => function ($q) {
+                return $q->select('name,lattitude,longitude,area,city,address,pincode');
+            }])->with('userAddress')->where(['id' => $requestParam['order_id']])->asArray()->all();
+            if (!empty($order)) {
+                $order[0]['special_offer_id'] = !empty($order[0]['special_offer_id']) ? $order[0]['special_offer_id'] : "";
+                $order[0]['delivery_person'] = !empty($order[0]['delivery_person']) ? $order[0]['delivery_person'] : "";
+                $order[0]['user']['phone'] = !empty($order[0]['user']['phone']) ? $order[0]['user']['phone'] : "";
+                $amReponseParam = $order;
+                $ssMessage = 'Order Details';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $ssMessage = 'Invalid Order.';
+                $amResponse = Common::successResponse($ssMessage, []);
+            }
+            // Device Registration
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
 }
