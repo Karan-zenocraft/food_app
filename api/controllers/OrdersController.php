@@ -134,6 +134,7 @@ class OrdersController extends \yii\base\Controller
                     $ttt = $arr;
                     $ttt['is_favourite'] = in_array($ttt['id'], $favouriteOrders_arr) ? "true" : "false";
                     $ttt['restaurant_id'] = !empty($ttt['restaurant_id']) ? $ttt['restaurant_id'] : "";
+                    $ttt['delivery_person'] = !empty($ttt['delivery_person']) ? $ttt['delivery_person'] : "";
                     $orderMenus = $ttt['orderMenus'];
                     array_walk($orderMenus, function ($arr) use (&$menus, $favouriteOrders_arr) {
                         $ttt = $arr;
@@ -212,6 +213,7 @@ class OrdersController extends \yii\base\Controller
                 $orderDetails[0]['restaurant_name'] = $menus[0]['restaurant_name'];
                 $orderDetails[0]['special_offer_id'] = !empty($orderDetails[0]['special_offer_id']) ? $orderDetails[0]['special_offer_id'] : "";
                 $orderDetails[0]['restaurant_id'] = !empty($orderDetails[0]['restaurant_id']) ? $orderDetails[0]['restaurant_id'] : "";
+                $orderDetails[0]['delivery_person'] = !empty($orderDetails[0]['delivery_person']) ? $orderDetails[0]['delivery_person'] : "";
                 $orderDetails[0]['coupan_code'] = !empty($orderDetails[0]['coupan_code']) ? $orderDetails[0]['coupan_code'] : "";
                 $amReponseParam = $orderDetails;
                 $ssMessage = 'Orders Details';

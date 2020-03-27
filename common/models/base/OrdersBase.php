@@ -83,10 +83,15 @@ class OrdersBase extends \yii\db\ActiveRecord
             'discounted_price' => 'Discounted Price',
             'amount_with_tax_discount' => 'Amount With Tax Discount',
             'price_to_owner' => 'Price To Owner',
+            'delivery_person' => 'Delivery Person',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+    public function getDeliveryPerson()
+    {
+        return $this->hasOne(Users::className(), ['id' => 'delivery_person']);
     }
     public function getRestaurant()
     {
