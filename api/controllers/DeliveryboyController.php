@@ -686,7 +686,7 @@ class DeliveryboyController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_id', 'order_id');
+        $amRequiredParams = array('user_id', 'status');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
@@ -710,6 +710,9 @@ class DeliveryboyController extends \yii\base\Controller
             $model->status_delivery_boy = $requestParam['status'];
             $model->save(false);
             $amReponseParam = $model;
+            $model->password_reset_token = !empty($model->password_reset_token) ? $model->password_reset_token : "";
+            $model->badge_count = !empty($model->badge_count) ? $model->badge_count : "";
+            $model->restaurant_id = !empty($model->restaurant_id) ? $model->restaurant_id : "";
             // Device Registration
             $ssMessage = 'Status update successfully';
             $amResponse = Common::successResponse($ssMessage, $amReponseParam);
