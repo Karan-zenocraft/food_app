@@ -754,6 +754,7 @@ class DeliveryboyController extends \yii\base\Controller
             $order = Orders::find()->where(['id' => $requestParam['order_id']])->one();
             if (!empty($order)) {
                 $order->delivery_person = $snUserId;
+                $order->save(false);
                 $amReponseParam = $order;
                 $ssMessage = 'Order accepted successfully';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
@@ -808,6 +809,54 @@ class DeliveryboyController extends \yii\base\Controller
                 $order[0]['user']['phone'] = !empty($order[0]['user']['phone']) ? $order[0]['user']['phone'] : "";
                 $amReponseParam = $order;
                 $ssMessage = 'Order Details';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $ssMessage = 'Invalid Order.';
+                $amResponse = Common::successResponse($ssMessage, []);
+            }
+            // Device Registration
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionOrderDelivered()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'order_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $order = Orders::find()->where(['delivery_person' => $snUserId, 'id' => $requestParam['order_id']])->one();
+            if (!empty($order)) {
+                $order->status = Yii::$app->params['order_status']['delievered'];
+                $order->save(false);
+                $order->special_offer_id = !empty($order->special_offer_id) ? $order->special_offer_id : "";
+                $amReponseParam = $order;
+                $ssMessage = 'Order status updated to delivered.';
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
             } else {
                 $ssMessage = 'Invalid Order.';
