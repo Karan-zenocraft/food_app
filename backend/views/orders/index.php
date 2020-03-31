@@ -89,6 +89,13 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                 return Yii::$app->params['order_status_value'][$data->status];
             },
         ],
+        'delivery_person',
+        [
+            'attribute' => 'delivery_person',
+            'value' => function ($data) {
+                return $data->deliveryPerson->user_name;
+            },
+        ],
         //'created_at',
         //'updated_at',
         [

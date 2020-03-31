@@ -71,15 +71,15 @@ class OrdersBase extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'user_id' => 'User ID',
+            'user_id' => 'Buyer',
             'payment_type' => 'Payment Type',
             'total_amount' => 'Total Amount',
             'delivery_charges' => 'Delivery Charges',
             'other_charges' => 'Other Charges',
-            'special_offer_id' => 'Special Offer ID',
+            'special_offer_id' => 'Special Offer',
             'discount' => 'Discount',
             'coupan_code' => 'Coupan Code',
-            'user_address_id' => 'User Address ID',
+            'user_address_id' => 'User Address',
             'discounted_price' => 'Discounted Price',
             'amount_with_tax_discount' => 'Amount With Tax Discount',
             'price_to_owner' => 'Price To Owner',
