@@ -34,7 +34,12 @@ use yii\widgets\ActiveForm;
     <?=$form->field($model, 'total_amount')?>
 </div>
 </div>
+<div class="row">
 
+    <div class="span3">
+    <?=$form->field($model, 'delivery_person')?>
+</div>
+</div>
 
     <?php //$form->field($model, 'delivery_charges')?>
 

@@ -91,7 +91,7 @@ class OrdersBase extends \yii\db\ActiveRecord
     }
     public function getDeliveryPerson()
     {
-        return $this->hasOne(Users::className(), ['id' => 'delivery_person']);
+        return $this->hasOne(Users::className(), ['id' => 'delivery_person'])->alias('deliveryPerson');
     }
     public function getRestaurant()
     {
@@ -118,7 +118,7 @@ class OrdersBase extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+        return $this->hasOne(Users::className(), ['id' => 'user_id'])->alias('user');
     }
 
     public function getUserAddress()

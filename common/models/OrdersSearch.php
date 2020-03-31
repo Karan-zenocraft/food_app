@@ -20,7 +20,7 @@ class OrdersSearch extends Orders
     {
         return [
             [['id', 'user_address_id', 'status'], 'integer'],
-            [['payment_type', 'created_at', 'updated_at', 'user_id'], 'safe'],
+            [['payment_type', 'created_at', 'updated_at', 'user_id', 'delivery_person'], 'safe'],
             [['total_amount', 'delivery_charges', 'other_charges'], 'number'],
         ];
     }
@@ -73,13 +73,16 @@ class OrdersSearch extends Orders
             'other_charges' => $this->other_charges,
             'user_address_id' => $this->user_address_id,
             'orders.status' => $this->status,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            // 'created_at' => $this->created_at,
+            // 'updated_at' => $this->updated_at,
         ]);
 
         $query->andFilterWhere(['like', 'payment_type', $this->payment_type]);
         $query->joinWith(['user' => function ($query) {
-            $query->where('users.user_name LIKE "%' . $this->user_id . '%"');
+            $query->where('user.user_name LIKE "%' . $this->user_id . '%"');
+        }]);
+        $query->joinWith(['deliveryPerson' => function ($query) {
+            $query->where('deliveryPerson.user_name LIKE "%' . $this->delivery_person . '%"');
         }]);
         return $dataProvider;
     }
