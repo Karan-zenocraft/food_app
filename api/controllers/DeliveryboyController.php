@@ -871,4 +871,59 @@ class DeliveryboyController extends \yii\base\Controller
         Common::encodeResponseJSON($amResponse);
     }
 
+    public function actionGetOrderHistory()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $orders = Orders::find()->select("DATE(created_at) dateOnly")->where(['delivery_person' => $snUserId])->asArray()->groupBy('dateOnly')->all();
+            if (!empty($orders)) {
+                foreach ($orders as $key => $value) {
+                    $getDataDateWise = Orders::find()->where(['DATE(created_at)' => $value['dateOnly'], 'delivery_person' => $requestParam['user_id']])->asArray()->all();
+                    $amReponseParam[$key]['date'] = $value['dateOnly'];
+                    array_walk($getDataDateWise, function ($arr) use (&$amResponseData) {
+                        $ttt = $arr;
+                        $ttt['special_offer_id'] = !empty($ttt['special_offer_id']) ? $ttt['special_offer_id'] : "";
+                        $amResponseData[] = $ttt;
+                        return $amResponseData;
+                    });
+                }
+                $amReponseParam[$key]['datewiseData'] = $amResponseData;
+                $ssMessage = 'Order History';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            } else {
+                $ssMessage = 'Invalid Order.';
+                $amResponse = Common::successResponse($ssMessage, []);
+            }
+            // Device Registration
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
 }
