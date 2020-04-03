@@ -129,6 +129,7 @@ class OrdersController extends \yii\base\Controller
                             $AreplaceString = array('{username}' => $model->user_name);
 
                             $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
+                            p($body);
                             $ssSubject = $emailformatemodel->subject;
                             //send email for new generated password
                             $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
