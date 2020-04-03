@@ -132,7 +132,6 @@ class OrdersController extends \yii\base\Controller
                             $ssSubject = $emailformatemodel->subject;
                             //send email for new generated password
                             $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
-                            p($ssResponse, 0);
 
                         }
                         $amReponseParam['orderMenus'] = $menusData;

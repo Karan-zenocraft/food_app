@@ -48,7 +48,9 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
         <div class="goodtable">
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);
+p($dataProvider);
+?>
 
     <?=GridView::widget([
     'dataProvider' => $dataProvider,
