@@ -14,7 +14,6 @@ use common\models\Orders;
 use common\models\Restaurants;
 use common\models\UserFavouriteOrders;
 use common\models\Users;
-use Twilio\Rest\Client;
 use Yii;
 use yii\web\Controller;
 
@@ -96,6 +95,7 @@ class OrdersController extends \yii\base\Controller
                         } else {
                             $status = Common::push_notification_android($device_tocken, $title, $body);
                         }
+                        p($status);
                         if ($status) {
                             $NotificationListModel = new NotificationList();
                             $NotificationListModel->user_id = $user_id;
@@ -107,21 +107,21 @@ class OrdersController extends \yii\base\Controller
                         /*   $account_sid = 'ACdfe15530240f01579a42172bc5261455';
                         $auth_token = 'd4f178d335e105d5196ce2d7fd376d82';*/
                         $restaurant_name = Common::get_name_by_id($requestParam['restaurant_id'], 'Restaurants');
-                        if (!empty($model->phone)) {
-                            $account_sid = Yii::$app->params['twillio_account_sid'];
-                            $auth_token = Yii::$app->params['twillio_auth_token'];
-                            $twilio_number = Yii::$app->params['twillio_phone_number'];
-                            // $twilio_number = "+12017338576";
-                            $client = new Client($account_sid, $auth_token);
-                            $client->messages->create(
-                                // Where to send a text message (your cell phone?)
-                                '+91' . $model->phone,
-                                array(
-                                    'from' => $twilio_number,
-                                    'body' => 'Your order is received.  You can track the order through your app',
-                                )
-                            );
-                        }
+                        /*         if (!empty($model->phone)) {
+                        $account_sid = Yii::$app->params['twillio_account_sid'];
+                        $auth_token = Yii::$app->params['twillio_auth_token'];
+                        $twilio_number = Yii::$app->params['twillio_phone_number'];
+                        // $twilio_number = "+12017338576";
+                        $client = new Client($account_sid, $auth_token);
+                        $client->messages->create(
+                        // Where to send a text message (your cell phone?)
+                        '+91' . $model->phone,
+                        array(
+                        'from' => $twilio_number,
+                        'body' => 'Your order is received.  You can track the order through your app',
+                        )
+                        );
+                        }*/
                         $emailformatemodel = EmailFormat::findOne(["title" => 'order_placed', "status" => '1']);
                         if ($emailformatemodel) {
 
