@@ -49,7 +49,7 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]);
-p($dataProvider);
+
 ?>
 
     <?=GridView::widget([
