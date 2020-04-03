@@ -79,10 +79,11 @@ class OrdersSearch extends Orders
 
         $query->andFilterWhere(['like', 'payment_type', $this->payment_type]);
         $query->joinWith(['user' => function ($query) {
-            $query->where('user.user_name LIKE "%' . $this->user_id . '%"');
+            // $query->andFilterWhere('user.user_name LIKE "%' . $this->user_id . '%"');
+            $query->andFilterWhere(['like', 'user.user_name', $this->user_id]);
         }]);
         $query->joinWith(['deliveryPerson' => function ($query) {
-            $query->where('deliveryPerson.user_name LIKE "%' . $this->delivery_person . '%"');
+            $query->andFilterWhere(['like', 'deliveryPerson.user_name', $this->delivery_person]);
         }]);
         return $dataProvider;
     }
