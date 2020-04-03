@@ -47,4 +47,7 @@ return [
     'order_status_value' => ['1' => 'Placed', '2' => 'Accepted', '3' => 'On the Way', '4' => 'Delievered', '5' => 'Cancelled'],
     'android_fcm_api_key' => 'AAAAy6A2HXo:APA91bFNAdf-gRAwul4F-JI7Bd68dpofkpCJWWC8EPzUCxVKn-xBHt1tD3C8pVXdHRbrSH92e8JWzQyt7MMJnIHn6P3Hn8Vd7hTWHOT8ai9-9UDNUfpPPP3R7mL2niLDfLn5tsJFpYqB',
     'device_type' => ["android" => "1", "ios" => "2"],
+    'twillio_account_sid' => 'ACdfe15530240f01579a42172bc5261455',
+    'twillio_auth_token' => 'd4f178d335e105d5196ce2d7fd376d82',
+    'twillio_phone_number' => '+12017338576',
 ];

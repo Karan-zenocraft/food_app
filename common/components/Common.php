@@ -1893,7 +1893,7 @@ class Common
                 $device_id,
             ),
             'data' => array(
-                "message" => $message,
+                "message" => "message",
             ),
             'notification' => array(
                 'title' => $title,
