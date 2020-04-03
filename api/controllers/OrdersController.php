@@ -24,7 +24,8 @@ class OrdersController extends \yii\base\Controller
 {
     public function actionAddOrder()
     {
-        $logo_img_url = Yii::$app->params['root_url'] . "/common/web/img/logo.jpg";
+        $logo_img_url = Yii::$app->params['root_url'] . "/common/web/img/logo.png";
+
         //Get all request parameter
         $amData = Common::checkRequestType();
         $amResponse = $amReponseParam = [];
@@ -128,9 +129,10 @@ class OrdersController extends \yii\base\Controller
                         if ($emailformatemodel) {
 
                             //create template file
-                            $AreplaceString = array('{username}' => $model->user_name, '{logo_img_url}' => $logo_img_url);
+                            $AreplaceString = array('{username}' => $model->user_name, 'logo_img_url' => $logo_img_url);
 
                             $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
+                            p($body);
                             $ssSubject = $emailformatemodel->subject;
                             //send email for new generated password
                             $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
