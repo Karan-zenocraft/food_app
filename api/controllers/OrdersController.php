@@ -88,7 +88,6 @@ class OrdersController extends \yii\base\Controller
                         $user_id = $requestParam['user_id'];
                         $deviceModel = DeviceDetails::find()->select('device_tocken,type')->where(['user_id' => $user_id])->one();
                         $device_tocken = $deviceModel->device_tocken;
-                        p($device_tocken, 0);
                         $type = $deviceModel->type;
                         $title = "Order Placed successfully";
                         $body = "Your order is " . Yii::$app->params['order_status_value'][$order->status];
@@ -97,7 +96,6 @@ class OrdersController extends \yii\base\Controller
                         } else {
                             $status = Common::push_notification_android($device_tocken, $title, $body);
                         }
-                        p($status);
                         if ($status) {
                             $NotificationListModel = new NotificationList();
                             $NotificationListModel->user_id = $user_id;
@@ -134,6 +132,7 @@ class OrdersController extends \yii\base\Controller
                             $ssSubject = $emailformatemodel->subject;
                             //send email for new generated password
                             $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
+                            p($ssResponse, 0);
 
                         }
                         $amReponseParam['orderMenus'] = $menusData;
