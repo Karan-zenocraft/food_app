@@ -24,6 +24,7 @@ class OrdersController extends \yii\base\Controller
 {
     public function actionAddOrder()
     {
+        $logo_img_url = Yii::$app->params['root_url'] . "/common/web/img/logo.jpg";
         //Get all request parameter
         $amData = Common::checkRequestType();
         $amResponse = $amReponseParam = [];
@@ -122,11 +123,12 @@ class OrdersController extends \yii\base\Controller
                         )
                         );
                         }*/
+
                         $emailformatemodel = EmailFormat::findOne(["title" => 'order_placed', "status" => '1']);
                         if ($emailformatemodel) {
 
                             //create template file
-                            $AreplaceString = array('{username}' => $model->user_name);
+                            $AreplaceString = array('{username}' => $model->user_name, '{logo_img_url}' => $logo_img_url);
 
                             $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
                             $ssSubject = $emailformatemodel->subject;
