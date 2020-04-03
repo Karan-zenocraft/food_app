@@ -95,8 +95,8 @@ class OrdersController extends \yii\base\Controller
                         } else {
                             $status = Common::push_notification_android($device_tocken, $title, $body);
                         }
-                        p(json_decode($status), 0);
-                        if ($status) {
+                        $statusArr = json_decode($status);
+                        if (!empty($status) && ($statusArr->success == "1")) {
                             $NotificationListModel = new NotificationList();
                             $NotificationListModel->user_id = $user_id;
                             $NotificationListModel->title = $title;
