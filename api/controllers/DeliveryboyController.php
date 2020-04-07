@@ -970,4 +970,81 @@ class DeliveryboyController extends \yii\base\Controller
         Common::encodeResponseJSON($amResponse);
     }
 
+    public function actionEditProfile()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_name', 'email', 'password', 'device_id', 'device_type', 'phone', 'user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        $requestFileparam = $amData['file_param'];
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $modelUser = Users::find()->where("id != '" . $snUserId . "' AND email = '" . $requestParam['email'] . "'")->all();
+            if (!empty($modelUser)) {
+                $amResponse = Common::errorResponse("Email you entered is already registred by other user.");
+                Common::encodeResponseJSON($amResponse);
+            }
+            $modelUserr = Users::find()->where("id != '" . $snUserId . "' AND phone = '" . $requestParam['phone'] . "'")->all();
+            if (!empty($modelUserr)) {
+                $amResponse = Common::errorResponse("Phone you entered is already registered by other user.");
+                Common::encodeResponseJSON($amResponse);
+            }
+            $modelUserr = Users::find()->where("id != '" . $snUserId . "' AND user_name = '" . $requestParam['user_name'] . "'")->all();
+            if (!empty($modelUserr)) {
+                $amResponse = Common::errorResponse("This user name is not avalaible.Please try another user name");
+                Common::encodeResponseJSON($amResponse);
+            }
+        }
+
+        // Common::sendSms( $Textmessage, "$requestParam[phone]" );
+        // Database field
+        $model->user_name = !empty($requestParam['user_name']) ? $requestParam['user_name'] : $model->user_name;
+        $model->email = !empty($requestParam['email']) ? $requestParam['email'] : $model->email;
+        $amReponseParam['login_type'] = 1;
+        // $model->password = md5($requestParam['password']);
+        /* $model->address_line_1 = !empty($requestParam['address_line_1']) ? $requestParam['address_line_1'] : "";*/
+        $model->phone = !empty($requestParam['phone']) ? Common::clean_special_characters($requestParam['phone']) : $model->phone;
+
+        if (isset($requestFileparam['photo']['name'])) {
+
+            $model->photo = UploadedFile::getInstanceByName('photo');
+            $Modifier = md5(($model->photo));
+            $OriginalModifier = $Modifier . rand(11111, 99999);
+            $Extension = $model->photo->extension;
+            $model->photo->saveAs(__DIR__ . "../../../uploads/" . $OriginalModifier . '.' . $model->photo->extension);
+            $model->photo = $OriginalModifier . '.' . $Extension;
+        }
+        if ($model->save(false)) {
+            $device_model = Devicedetails::find()->where(['user_id' => $model->id])->one();
+
+            $ssMessage = 'Your profile has been successfully updated.';
+            $amReponseParam['email'] = $model->email;
+            $amReponseParam['user_id'] = $model->id;
+            $amReponseParam['role'] = $model->role_id;
+            $amReponseParam['user_name'] = $model->user_name;
+            $amReponseParam['phone'] = $model->phone;
+            $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+            $amReponseParam['device_token'] = $device_model->device_tocken;
+            $amReponseParam['device_type'] = $device_model->type;
+            $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
+            $amReponseParam['auth_token'] = $model->auth_token;
+            $amReponseParam['documents'] = [];
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
 }
