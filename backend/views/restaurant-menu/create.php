@@ -9,6 +9,13 @@ $this->params['breadcrumbs'][] = ['label' => Common::get_name_by_id($_GET['cid']
 $this->params['breadcrumbs'][] = ['label' => 'Restaurant Menus', 'url' => ['index', 'rid' => $_GET['rid'], 'cid' => $_GET['cid']]];
 $this->params['breadcrumbs'][] = $this->title
 ?>
+<style type="text/css">
+    
+.nav-list li:nth-child(4), .nav-list li:nth-child(4) a:hover{background: #006dcc;}
+.nav-list li:nth-child(4) span, .nav-list li:nth-child(4) span:hover{color: #fff!important;}
+
+</style>
+
 <div class="restaurant-menu-create email-format-create">
 
     <?=$this->render('_form', [
