@@ -631,7 +631,7 @@ class DeliveryboyController extends \yii\base\Controller
             }])->with(['restaurant' => function ($q) {
             return $q->select("name,area,city,address,pincode,lattitude,longitude");
             }])*/    ->leftJoin('user_address', 'orders.user_address_id=user_address.id')
-                ->where("round(( 3959 * acos( least(1.0,cos( radians(" . $user_latitude . ") ) * cos( radians(user_address.lat) ) * cos( radians(user_address.long) - radians(" . $user_longitude . ") ) + sin( radians(" . $user_latitude . ") ) * sin( radians(user_address.lat))))), 1) < " . $radius . " AND orders.status=" . Yii::$app->params['order_status']['accepted'] . "")->asArray()->all();
+                ->where("round(( 3959 * acos( least(1.0,cos( radians(" . $user_latitude . ") ) * cos( radians(user_address.lat) ) * cos( radians(user_address.long) - radians(" . $user_longitude . ") ) + sin( radians(" . $user_latitude . ") ) * sin( radians(user_address.lat))))), 1) < " . $radius . " AND orders.status=" . Yii::$app->params['order_status']['accepted'] . " AND orders.delivery_person is NULL")->asArray()->all();
             /* with(['userAddress' => function ($q) use ($user_latitude, $user_longitude, $radius) {
             return $q->where("round(( 3959 * acos( least(1.0,cos( radians(" . $user_latitude . ") ) * cos( radians(`lat`) ) * cos( radians(`long`) - radians(" . $user_longitude . ") ) + sin( radians(" . $user_latitude . ") ) * sin( radians(`lat`))))), 1) < " . $radius . "");
             }])->asArray()->all();*/
@@ -699,7 +699,7 @@ class DeliveryboyController extends \yii\base\Controller
         //Check User Status//
         Common::matchRole($requestParam['user_id']);
         Common::matchUserStatus($requestParam['user_id']);
-        Common::matchDeliveryBoyStatus($requestParam['user_id']);
+        // Common::matchDeliveryBoyStatus($requestParam['user_id']);
 
         //VERIFY AUTH TOKEN
         $authToken = Common::get_header('auth_token');
@@ -920,6 +920,129 @@ class DeliveryboyController extends \yii\base\Controller
             // Device Registration
         } else {
             $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    // For Geting Daily data by date
+    public function actionLogout()
+    {
+        $amData = Common::checkRequestType();
+        $amResponse = array();
+        $ssMessage = '';
+        $amRequiredParams = array('user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+        $requestParam = $amData['request_param'];
+        // Check User Status
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+
+        $userModel = Users::findOne(['id' => $requestParam['user_id']]);
+        if (!empty($userModel)) {
+            if (!empty($amData['request_param']['device_id'])) {
+                if (($device_model = Devicedetails::findOne(['device_tocken' => $amData['request_param']['device_id'], 'user_id' => $requestParam['user_id']])) !== null) {
+                    $device_model->delete();
+                } else {
+                    $ssMessage = 'Your deivce token is invalid.';
+                    $amResponse = Common::errorResponse($ssMessage);
+                }
+            }
+            $userModel->status_delivery_boy = 0;
+            $userModel->auth_token = "";
+            $amReponseParam = [];
+            $userModel->save(false);
+            $ssMessage = 'Logout successfully';
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+        } else {
+            $ssMessage = 'Invalid user_id';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionEditProfile()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_name', 'email', 'phone', 'user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+        $requestParam = $amData['request_param'];
+        $requestFileparam = $amData['file_param'];
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model) && ($model->role_id == Yii::$app->params['userroles']['delivery_boy'])) {
+            $modelUser = Users::find()->where("id != '" . $snUserId . "' AND email = '" . $requestParam['email'] . "'")->all();
+            if (!empty($modelUser)) {
+                $amResponse = Common::errorResponse("Email you entered is already registred by other user.");
+                Common::encodeResponseJSON($amResponse);
+            }
+            $modelUserr = Users::find()->where("id != '" . $snUserId . "' AND phone = '" . $requestParam['phone'] . "'")->all();
+            if (!empty($modelUserr)) {
+                $amResponse = Common::errorResponse("Phone you entered is already registered by other user.");
+                Common::encodeResponseJSON($amResponse);
+            }
+            $modelUserr = Users::find()->where("id != '" . $snUserId . "' AND user_name = '" . $requestParam['user_name'] . "'")->all();
+            if (!empty($modelUserr)) {
+                $amResponse = Common::errorResponse("This user name is not avalaible.Please try another user name");
+                Common::encodeResponseJSON($amResponse);
+            }
+
+            // Common::sendSms( $Textmessage, "$requestParam[phone]" );
+            // Database field
+            $model->user_name = !empty($requestParam['user_name']) ? $requestParam['user_name'] : $model->user_name;
+            $model->email = !empty($requestParam['email']) ? $requestParam['email'] : $model->email;
+            $amReponseParam['login_type'] = 1;
+            // $model->password = md5($requestParam['password']);
+            /* $model->address_line_1 = !empty($requestParam['address_line_1']) ? $requestParam['address_line_1'] : "";*/
+            $model->phone = !empty($requestParam['phone']) ? Common::clean_special_characters($requestParam['phone']) : $model->phone;
+
+            if (isset($requestFileparam['photo']['name'])) {
+
+                $model->photo = UploadedFile::getInstanceByName('photo');
+                $Modifier = md5(($model->photo));
+                $OriginalModifier = $Modifier . rand(11111, 99999);
+                $Extension = $model->photo->extension;
+                $model->photo->saveAs(__DIR__ . "../../../uploads/" . $OriginalModifier . '.' . $model->photo->extension);
+                $model->photo = $OriginalModifier . '.' . $Extension;
+            }
+            if ($model->save(false)) {
+                $device_model = Devicedetails::find()->where(['user_id' => $model->id])->one();
+
+                $ssMessage = 'Your profile has been successfully updated.';
+                $amReponseParam['email'] = $model->email;
+                $amReponseParam['user_id'] = $model->id;
+                $amReponseParam['role'] = $model->role_id;
+                $amReponseParam['user_name'] = $model->user_name;
+                $amReponseParam['phone'] = $model->phone;
+                $amReponseParam['photo'] = !empty($model->photo) && file_exists(Yii::getAlias('@root') . '/' . "uploads/" . $model->photo) ? Yii::$app->params['root_url'] . '/' . "uploads/" . $model->photo : Yii::$app->params['root_url'] . '/' . "uploads/no_image.png";
+                $amReponseParam['device_token'] = $device_model->device_tocken;
+                $amReponseParam['device_type'] = $device_model->type;
+                $amReponseParam['gcm_registration_id'] = !empty($device_model->gcm_id) ? $device_model->gcm_id : "";
+                $amReponseParam['auth_token'] = $model->auth_token;
+                $amReponseParam['documents'] = [];
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid user';
             $amResponse = Common::errorResponse($ssMessage);
         }
         // FOR ENCODE RESPONSE INTO JSON //

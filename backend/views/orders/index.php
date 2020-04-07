@@ -48,7 +48,9 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
         <div class="goodtable">
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);
+
+?>
 
     <?=GridView::widget([
     'dataProvider' => $dataProvider,
@@ -87,6 +89,13 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
             'attribute' => 'status',
             'value' => function ($data) {
                 return Yii::$app->params['order_status_value'][$data->status];
+            },
+        ],
+        'delivery_person',
+        [
+            'attribute' => 'delivery_person',
+            'value' => function ($data) {
+                return $data->deliveryPerson->user_name;
             },
         ],
         //'created_at',

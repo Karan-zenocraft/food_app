@@ -5,6 +5,9 @@ namespace api\controllers;
 use common\components\Common;
 
 /* USE COMMON MODELS */
+use common\models\DeviceDetails;
+use common\models\EmailFormat;
+use common\models\NotificationList;
 use common\models\OrderMenus;
 use common\models\OrderPayment;
 use common\models\Orders;
@@ -81,12 +84,62 @@ class OrdersController extends \yii\base\Controller
                             $menuModel->save(false);
                             $menusData[] = $menuModel;
                         }
+                        $user_id = $requestParam['user_id'];
+                        $deviceModel = DeviceDetails::find()->select('device_tocken,type')->where(['user_id' => $user_id])->one();
+                        $device_tocken = $deviceModel->device_tocken;
+                        $type = $deviceModel->type;
+                        $title = "Order Placed successfully";
+                        $body = "Your order is " . Yii::$app->params['order_status_value'][$order->status];
+                        if ($type == Yii::$app->params['device_type']['android']) {
+                            $status = Common::push_notification_android($device_tocken, $title, $body);
+                        } else {
+                            $status = Common::push_notification_android($device_tocken, $title, $body);
+                        }
+                        $statusArr = json_decode($status);
+                        if (!empty($status) && ($statusArr->success == "1")) {
+                            $NotificationListModel = new NotificationList();
+                            $NotificationListModel->user_id = $user_id;
+                            $NotificationListModel->title = $title;
+                            $NotificationListModel->body = $body;
+                            $NotificationListModel->status = 1;
+                            $NotificationListModel->save(false);
+                        }
+                        /*   $account_sid = 'ACdfe15530240f01579a42172bc5261455';
+                        $auth_token = 'd4f178d335e105d5196ce2d7fd376d82';*/
+                        $restaurant_name = Common::get_name_by_id($requestParam['restaurant_id'], 'Restaurants');
+                        /*         if (!empty($model->phone)) {
+                        $account_sid = Yii::$app->params['twillio_account_sid'];
+                        $auth_token = Yii::$app->params['twillio_auth_token'];
+                        $twilio_number = Yii::$app->params['twillio_phone_number'];
+                        // $twilio_number = "+12017338576";
+                        $client = new Client($account_sid, $auth_token);
+                        $client->messages->create(
+                        // Where to send a text message (your cell phone?)
+                        '+91' . $model->phone,
+                        array(
+                        'from' => $twilio_number,
+                        'body' => 'Your order is received.  You can track the order through your app',
+                        )
+                        );
+                        }*/
+                        $emailformatemodel = EmailFormat::findOne(["title" => 'order_placed', "status" => '1']);
+                        if ($emailformatemodel) {
+
+                            //create template file
+                            $AreplaceString = array('{username}' => $model->user_name);
+
+                            $body = Common::MailTemplate($AreplaceString, $emailformatemodel->body);
+                            $ssSubject = $emailformatemodel->subject;
+                            //send email for new generated password
+                            $ssResponse = Common::sendMail($model->email, Yii::$app->params['adminEmail'], $ssSubject, $body);
+
+                        }
                         $amReponseParam['orderMenus'] = $menusData;
                         $ssMessage = 'Order has been successfully placed.';
                         $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
                     } else {
-                        $ssMessage = 'menus can not br blank.';
+                        $ssMessage = 'Menus can not br blank.';
                         $amResponse = Common::errorResponse($ssMessage);
                     }
 
