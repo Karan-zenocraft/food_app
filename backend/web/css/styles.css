@@ -7,8 +7,8 @@ body {
 
 #login-form hr, #forgot-password-form hr{border-bottom: 1px solid #ddd!important;}
 #login-form, #forgot-password-form{
-    box-shadow: 0 10px 30px rgba(0,0,0,.1);
-width: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.1);background: #fff;border: 1px solid #e5e5e5;border-radius: 5px;
+width: 350px;
     margin: auto;
     padding: 30px;}
 .container-fluid.logo-container{padding: 0px 30px;}
@@ -72,7 +72,7 @@ width: 500px;
 a{color: #000;}
 a:hover, a:focus{color: #000;}
 .radio, .checkbox{padding-left:  0;}
-  form, a, input, h3, p, label, .btn, .form-horizontal .control-label, .summary, .dropdown-menu>li>a, .easyPieChart, .table th, .table td, .bs-docs-sidenav > li > a, .navbar .nav>li>a, .pull-left, .breadcrumb>li, .label-info, .badge-info, .btn-success, .btn-primary{letter-spacing: 1px;
+  form, a, input, h3, p, label, .btn, .form-horizontal .control-label, .summary, .dropdown-menu>li>a, .easyPieChart, .table th, .table td, .bs-docs-sidenav > li > a, .navbar .nav>li>a, .pull-left, .breadcrumb>li, .label-info, .badge-info, .btn-success, .btn-primary{letter-spacing: 0px;
         font-family: sans-serif;}  
         .pull-right  {margin-bottom: 0px;margin-top: 0px;}
 
