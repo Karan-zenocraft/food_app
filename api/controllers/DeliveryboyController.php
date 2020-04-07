@@ -989,7 +989,7 @@ class DeliveryboyController extends \yii\base\Controller
         $requestFileparam = $amData['file_param'];
         $snUserId = $requestParam['user_id'];
         $model = Users::findOne(["id" => $snUserId]);
-        if (!empty($model) && ($model->role == Yii::$app->params['userroles']['delivery_boy'])) {
+        if (!empty($model) && ($model->role_id == Yii::$app->params['userroles']['delivery_boy'])) {
             $modelUser = Users::find()->where("id != '" . $snUserId . "' AND email = '" . $requestParam['email'] . "'")->all();
             if (!empty($modelUser)) {
                 $amResponse = Common::errorResponse("Email you entered is already registred by other user.");
