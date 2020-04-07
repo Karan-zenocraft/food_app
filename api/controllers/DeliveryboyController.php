@@ -699,7 +699,7 @@ class DeliveryboyController extends \yii\base\Controller
         //Check User Status//
         Common::matchRole($requestParam['user_id']);
         Common::matchUserStatus($requestParam['user_id']);
-        Common::matchDeliveryBoyStatus($requestParam['user_id']);
+        // Common::matchDeliveryBoyStatus($requestParam['user_id']);
 
         //VERIFY AUTH TOKEN
         $authToken = Common::get_header('auth_token');
