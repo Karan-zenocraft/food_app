@@ -60,7 +60,7 @@ NavBar::end();
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; Food App <?=date('Y')?></p>
+        <p class="pull-left">&copy;Zippy Chef APP <?=date('Y')?></p>
 
         <p class="pull-right"><?=Yii::powered()?></p>
     </div>

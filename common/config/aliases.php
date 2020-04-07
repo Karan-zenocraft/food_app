@@ -15,8 +15,8 @@ Yii::setAlias('console', dirname(dirname(__DIR__)) . '/console');
 Yii::setAlias('@root', realpath(dirname(__FILE__) . '/../../'));
 
 //START: site configuration
-Yii::setAlias('site_title', 'Food App');
-Yii::setAlias('site_footer', 'Food App');
+Yii::setAlias('site_title', 'Zippy Chef APP');
+Yii::setAlias('site_footer', 'Zippy Chef APP');
 //END: site configuration
 
 //START: BACK-END message
