@@ -977,7 +977,7 @@ class DeliveryboyController extends \yii\base\Controller
         $amResponse = $amReponseParam = [];
 
         // Check required validation for request parameter.
-        $amRequiredParams = array('user_name', 'email', 'password', 'device_id', 'device_type', 'phone', 'user_id');
+        $amRequiredParams = array('user_name', 'email', 'phone', 'user_id');
         $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
 
         // If any getting error in request paramter then set error message.
