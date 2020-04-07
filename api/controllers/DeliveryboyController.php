@@ -926,4 +926,48 @@ class DeliveryboyController extends \yii\base\Controller
         Common::encodeResponseJSON($amResponse);
     }
 
+    // For Geting Daily data by date
+    public function actionLogout()
+    {
+        $amData = Common::checkRequestType();
+        $amResponse = array();
+        $ssMessage = '';
+        $amRequiredParams = array('user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+        $requestParam = $amData['request_param'];
+        // Check User Status
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+
+        $userModel = Users::findOne(['id' => $requestParam['user_id']]);
+        if (!empty($userModel)) {
+            if (!empty($amData['request_param']['device_id'])) {
+                if (($device_model = Devicedetails::findOne(['device_tocken' => $amData['request_param']['device_id'], 'user_id' => $requestParam['user_id']])) !== null) {
+                    $device_model->delete();
+                } else {
+                    $ssMessage = 'Your deivce token is invalid.';
+                    $amResponse = Common::errorResponse($ssMessage);
+                }
+            }
+            $userModel->status_delivery_boy = 0;
+            $userModel->auth_token = "";
+            $amReponseParam = [];
+            $userModel->save(false);
+            $ssMessage = 'Logout successfully';
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+        } else {
+            $ssMessage = 'Invalid user_id';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        Common::encodeResponseJSON($amResponse);
+    }
+
 }
