@@ -60,11 +60,11 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
                 return $model->role_id == 2;
             }, 'whenClient' => "function (attribute, value) {
                 return $('#users-role_id').val() == 2;
-            }"],
+            }", ],
             [['email'], 'email'],
             ['user_name', 'validateUserName'],
             ['email', 'validateEmail'],
-            [['created_at', 'updated_at', 'is_code_verified', 'password_reset_token', 'badge_count', 'auth_token', 'verification_code'], 'safe'],
+            [['created_at', 'updated_at', 'is_code_verified', 'password_reset_token', 'badge_count', 'auth_token', 'verification_code', 'wallet'], 'safe'],
             [['photo'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
             [['user_name', 'email', 'password'], 'string', 'max' => 255],
             //[['role_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserRoles::className(), 'targetAttribute' => ['role_id' => 'id']],
@@ -94,6 +94,7 @@ class Users extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
             'restaurant_id' => 'Restaurant',
             'phone' => 'Contact No',
             'login_type' => 'Login Type',
+            'wallet' => 'Wallet',
         ];
     }
     public function validateEmail()

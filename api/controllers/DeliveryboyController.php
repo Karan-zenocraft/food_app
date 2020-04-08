@@ -753,11 +753,25 @@ class DeliveryboyController extends \yii\base\Controller
         if (!empty($model)) {
             $order = Orders::find()->where(['id' => $requestParam['order_id']])->one();
             if (!empty($order)) {
-                $order->delivery_person = $snUserId;
-                $order->save(false);
-                $amReponseParam = $order;
-                $ssMessage = 'Order accepted successfully';
-                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                if (($order->payment_type == Yii::$app->params['payment_type']['cod'])) {
+                    if ($model->wallet >= 0) {
+                        $order->delivery_person = $snUserId;
+                        $order->save(false);
+                        $amReponseParam = $order;
+                        $ssMessage = 'Order accepted successfully';
+                        $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+                    } else {
+                        $ssMessage = 'Your wallet is negative.You can not accept Cash on Delivery Orders.';
+                        $amResponse = Common::successResponse($ssMessage, []);
+                    }
+                } else {
+                    $order->delivery_person = $snUserId;
+                    $order->save(false);
+                    $amReponseParam = $order;
+                    $ssMessage = 'Order accepted successfully';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                }
             } else {
                 $ssMessage = 'Invalid Order.';
                 $amResponse = Common::successResponse($ssMessage, []);
@@ -906,6 +920,8 @@ class DeliveryboyController extends \yii\base\Controller
                     array_walk($getDataDateWise, function ($arr) use (&$amResponseData) {
                         $ttt = $arr;
                         $ttt['special_offer_id'] = !empty($ttt['special_offer_id']) ? $ttt['special_offer_id'] : "";
+                        $ttt['restaurant_name'] = !empty($ttt['restaurant_id']) ? Common::get_name_by_id($ttt['restaurant_id'], "Restaurants") : "";
+                        $ttt['customer_name'] = !empty($ttt['user_id']) ? Common::get_user_name($ttt['user_id']) : "";
                         $amResponseData[] = $ttt;
                         return $amResponseData;
                     });
