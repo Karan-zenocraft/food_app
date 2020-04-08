@@ -871,7 +871,14 @@ class DeliveryboyController extends \yii\base\Controller
             $order = Orders::find()->where(['delivery_person' => $snUserId, 'id' => $requestParam['order_id']])->one();
             if (!empty($order)) {
                 $order->status = Yii::$app->params['order_status']['delievered'];
-                $order->save(false);
+                if ($order->save(false)) {
+                    if ($order->payment_type == Yii::$app->params['payment_type']['cod']) {
+                        $model->wallet = $model->wallet - $order->other_charges;
+                    } else {
+                        $model->wallet = $model->wallet + $order->delivery_charges;
+                    }
+                    $model->save(false);
+                }
                 $order->special_offer_id = !empty($order->special_offer_id) ? $order->special_offer_id : "";
                 $amReponseParam = $order;
                 $ssMessage = 'Order status updated to delivered.';
@@ -1063,6 +1070,46 @@ class DeliveryboyController extends \yii\base\Controller
             }
         } else {
             $ssMessage = 'Invalid user';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionGetWalletAmount()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $amReponseParam['wallet'] = $model->wallet;
+            $ssMessage = 'Wallet Amount';
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+            // Device Registration
+        } else {
+            $ssMessage = 'Invalid User.';
             $amResponse = Common::errorResponse($ssMessage);
         }
         // FOR ENCODE RESPONSE INTO JSON //
