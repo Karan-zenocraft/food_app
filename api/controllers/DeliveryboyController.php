@@ -814,7 +814,11 @@ class DeliveryboyController extends \yii\base\Controller
         if (!empty($model)) {
             $order = Orders::find()->with(['user' => function ($q) {
                 return $q->select('phone,user_name');
-            }])->with('orderMenus')->with(['restaurant' => function ($q) {
+            }])->with(['orderMenus' => function ($q) {
+                return $q->with(['menu' => function ($q) {
+                    return $q->select('restaurant_menu.id,restaurant_menu.name');
+                }]);
+            }])->with(['restaurant' => function ($q) {
                 return $q->select('name,lattitude,longitude,area,city,address,pincode');
             }])->with('userAddress')->where(['id' => $requestParam['order_id']])->asArray()->all();
             if (!empty($order)) {
