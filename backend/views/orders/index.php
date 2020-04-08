@@ -82,8 +82,10 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
             },
         ],
         [
-            'label' => 'transaction_id',
-            'value' => 'orderPayments.transaction_id',
+            'attribute' => 'transaction_id',
+            'value' => function ($data) {
+                return !empty($data->payment_type != Yii::$app->params['payment_type']['cod']) ? $data->orderPayments->transaction_id : "-";
+            },
         ],
         [
             'attribute' => 'status',
@@ -91,7 +93,6 @@ if ($user_role == Yii::$app->params['userroles']['super_admin']) {?>
                 return Yii::$app->params['order_status_value'][$data->status];
             },
         ],
-        'delivery_person',
         [
             'attribute' => 'delivery_person',
             'value' => function ($data) {

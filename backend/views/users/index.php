@@ -96,6 +96,12 @@ $this->params['breadcrumbs'][] = $this->title;
         //'badge_count',
         //'login_type',
         [
+            'attribute' => 'wallet',
+            'value' => function ($data) {
+                return ($data->role_id == Yii::$app->params['userroles']['delivery_boy']) ? $data->wallet : "-";
+            },
+        ],
+        [
             'attribute' => 'status',
             'filterOptions' => ["style" => "width:13%;"],
             'headerOptions' => ["style" => "width:13%;"],
