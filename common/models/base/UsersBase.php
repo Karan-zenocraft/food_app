@@ -8,6 +8,7 @@ use common\models\NotificationList;
 use common\models\Restaurants;
 use common\models\UserAccountDetails;
 use common\models\UserAddress;
+use common\models\WithdrawDetails;
 use Yii;
 
 /**
@@ -80,6 +81,10 @@ class Users extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'restaurant_id' => 'Restaurant ID',
         ];
+    }
+    public function getWithdrawDetails()
+    {
+        return $this->hasMany(WithdrawDetails::className(), ['user_id' => 'id']);
     }
     public function getUserAccountDetails()
     {

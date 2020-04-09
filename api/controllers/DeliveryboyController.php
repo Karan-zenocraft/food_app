@@ -11,6 +11,7 @@ use common\models\Restaurants;
 use common\models\UserAccountDetails;
 use common\models\UserAddress;
 use common\models\Users;
+use common\models\WithdrawDetails;
 use Yii;
 
 /* USE COMMON MODELS */
@@ -1214,6 +1215,90 @@ class DeliveryboyController extends \yii\base\Controller
                 $amResponse = Common::errorResponse($ssMessage);
             }
 
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionWithdrawFromWallet()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'amount');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        $amReponseParam = [];
+        if (!empty($model)) {
+            if (($model->wallet > 100) && ($requestParam['amount'] <= $model->wallet - 100)) {
+                $UserAccountDetails = UserAccountDetails::find()->where(['user_id' => $requestParam['user_id']])->one();
+                if (!empty($UserAccountDetails)) {
+                    \Stripe\Stripe::setApiKey('sk_test_ZBaRU0wL5z8YaEEPUhY3jzgF00tdHXg5cp');
+// Create a PaymentIntent:
+                    try {
+                        $paymentIntent = \Stripe\PaymentIntent::create([
+                            'amount' => $requestParam['amount'],
+                            'currency' => 'usd',
+                            'payment_method_types' => ['card'],
+                            'transfer_group' => '{WITHDRAW' . $requestParam['amount'] . '}',
+
+                        ]);
+                        $transfer = \Stripe\Transfer::create([
+                            'amount' => $requestParam['amount'],
+                            'currency' => 'usd',
+                            'destination' => $UserAccountDetails['stripe_connect_account_id'],
+                            'transfer_group' => '{WITHDRAW' . $requestParam['amount'] . '}',
+                            'source_transaction' => null,
+                        ]);
+
+                        if (!empty($transfer->id)) {
+                            $withdrawDetails = new WithdrawDetails();
+                            $withdrawDetails->user_id = $requestParam['user_id'];
+                            $withdrawDetails->transfer_id = $transfer->id;
+                            $withdrawDetails->amount = $requestParam['amount'];
+                            $withdrawDetails->save(false);
+                            $model->wallet = $model->wallet - $requestParam['amount'];
+                            $model->save(false);
+                            $amReponseParam = $withdrawDetails;
+                            $ssMessage = 'Money Withdrawed successfully to your stripe bank account';
+                            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                        }
+                    } catch (\Exception $e) {
+                        p($e);
+                        $ssMessage = 'Something went wrong.Please try again later.';
+                        $amResponse = Common::errorResponse($ssMessage);
+                    }
+
+                } else {
+                    $ssMessage = 'Please add your bank account details to withdraw money from wallet.';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                }
+            } else {
+
+                $ssMessage = 'You can not withdraw requested amount as your wallet has isufficient balance';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
         } else {
             $ssMessage = 'Invalid User.';
             $amResponse = Common::errorResponse($ssMessage);
