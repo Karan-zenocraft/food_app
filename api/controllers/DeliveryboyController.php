@@ -8,8 +8,10 @@ use common\models\DriverDocuments;
 use common\models\EmailFormat;
 use common\models\Orders;
 use common\models\Restaurants;
+use common\models\UserAccountDetails;
 use common\models\UserAddress;
 use common\models\Users;
+use common\models\WithdrawDetails;
 use Yii;
 
 /* USE COMMON MODELS */
@@ -753,11 +755,25 @@ class DeliveryboyController extends \yii\base\Controller
         if (!empty($model)) {
             $order = Orders::find()->where(['id' => $requestParam['order_id']])->one();
             if (!empty($order)) {
-                $order->delivery_person = $snUserId;
-                $order->save(false);
-                $amReponseParam = $order;
-                $ssMessage = 'Order accepted successfully';
-                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                if (($order->payment_type == Yii::$app->params['payment_type']['cod'])) {
+                    if ($model->wallet >= 0) {
+                        $order->delivery_person = $snUserId;
+                        $order->save(false);
+                        $amReponseParam = $order;
+                        $ssMessage = 'Order accepted successfully';
+                        $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+                    } else {
+                        $ssMessage = 'Your wallet is negative.You can not accept Cash on Delivery Orders.';
+                        $amResponse = Common::successResponse($ssMessage, []);
+                    }
+                } else {
+                    $order->delivery_person = $snUserId;
+                    $order->save(false);
+                    $amReponseParam = $order;
+                    $ssMessage = 'Order accepted successfully';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                }
             } else {
                 $ssMessage = 'Invalid Order.';
                 $amResponse = Common::successResponse($ssMessage, []);
@@ -800,7 +816,11 @@ class DeliveryboyController extends \yii\base\Controller
         if (!empty($model)) {
             $order = Orders::find()->with(['user' => function ($q) {
                 return $q->select('phone,user_name');
-            }])->with('orderMenus')->with(['restaurant' => function ($q) {
+            }])->with(['orderMenus' => function ($q) {
+                return $q->with(['menu' => function ($q) {
+                    return $q->select('restaurant_menu.id,restaurant_menu.name');
+                }]);
+            }])->with(['restaurant' => function ($q) {
                 return $q->select('name,lattitude,longitude,area,city,address,pincode');
             }])->with('userAddress')->where(['id' => $requestParam['order_id']])->asArray()->all();
             if (!empty($order)) {
@@ -853,7 +873,14 @@ class DeliveryboyController extends \yii\base\Controller
             $order = Orders::find()->where(['delivery_person' => $snUserId, 'id' => $requestParam['order_id']])->one();
             if (!empty($order)) {
                 $order->status = Yii::$app->params['order_status']['delievered'];
-                $order->save(false);
+                if ($order->save(false)) {
+                    if ($order->payment_type == Yii::$app->params['payment_type']['cod']) {
+                        $model->wallet = $model->wallet - $order->other_charges;
+                    } else {
+                        $model->wallet = $model->wallet + $order->delivery_charges;
+                    }
+                    $model->save(false);
+                }
                 $order->special_offer_id = !empty($order->special_offer_id) ? $order->special_offer_id : "";
                 $amReponseParam = $order;
                 $ssMessage = 'Order status updated to delivered.';
@@ -906,6 +933,8 @@ class DeliveryboyController extends \yii\base\Controller
                     array_walk($getDataDateWise, function ($arr) use (&$amResponseData) {
                         $ttt = $arr;
                         $ttt['special_offer_id'] = !empty($ttt['special_offer_id']) ? $ttt['special_offer_id'] : "";
+                        $ttt['restaurant_name'] = !empty($ttt['restaurant_id']) ? Common::get_name_by_id($ttt['restaurant_id'], "Restaurants") : "";
+                        $ttt['customer_name'] = !empty($ttt['user_id']) ? Common::get_user_name($ttt['user_id']) : "";
                         $amResponseData[] = $ttt;
                         return $amResponseData;
                     });
@@ -1043,6 +1072,235 @@ class DeliveryboyController extends \yii\base\Controller
             }
         } else {
             $ssMessage = 'Invalid user';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionGetWalletAmount()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        if (!empty($model)) {
+            $amReponseParam['wallet'] = $model->wallet;
+            $ssMessage = 'Wallet Amount';
+            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+            // Device Registration
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionAddUserAccountDetails()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'stripe_bank_account_holder_name', 'stripe_bank_account_holder_type', 'stripe_bank_routing_number', 'stripe_bank_account_number');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+        $requestParam = $amData['request_param'];
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken, $requestParam['user_id']);
+        //Check User Status//
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        $snUserAddressList = [];
+        if (!empty($model)) {
+            $AccountDetails = UserAccountDetails::find()->where(["user_id" => $requestParam['user_id']])->one();
+            if (!empty($AccountDetails)) {
+                $ssMessage = 'Your account details are already added';
+                $amResponse = Common::errorResponse($ssMessage);
+                Common::encodeResponseJSON($amResponse);
+            }
+// Generate Stripe Bank account and connect account from the data
+            \Stripe\Stripe::setApiKey("sk_test_ZBaRU0wL5z8YaEEPUhY3jzgF00tdHXg5cp");
+            try {
+                // first create bank token
+                $bankToken = \Stripe\Token::create([
+                    'bank_account' => [
+                        'country' => 'US',
+                        'currency' => 'usd',
+                        'account_holder_name' => $requestParam['stripe_bank_account_holder_name'],
+                        'account_holder_type' => $requestParam['stripe_bank_account_holder_type'],
+                        'routing_number' => $requestParam['stripe_bank_routing_number'],
+                        'account_number' => $requestParam['stripe_bank_account_number'],
+                    ],
+                ]);
+                $account_holder_name = explode(" ", $requestParam['stripe_bank_account_holder_name']);
+                $first_name = $account_holder_name[0];
+                $last_name = $account_holder_name[1];
+                // second create stripe account
+                $stripeAccount = \Stripe\Account::create([
+                    "type" => "custom",
+                    "country" => "US",
+                    "email" => $model->email,
+                    "business_type" => "individual",
+                    "business_profile" => [
+                        "url" => "http://www.zenocraft.com",
+                    ],
+                    "individual" => [
+                        "first_name" => $first_name,
+                        "last_name" => $last_name,
+                    ],
+                    "requested_capabilities" => ['transfers'],
+                ]);
+                // third link the bank account with the stripe account
+                $bankAccount = \Stripe\Account::createExternalAccount(
+                    $stripeAccount->id, ['external_account' => $bankToken->id]
+                );
+                // Fourth stripe account update for tos acceptance
+                \Stripe\Account::update(
+                    $stripeAccount->id, [
+                        'tos_acceptance' => [
+                            'date' => time(),
+                            'ip' => $_SERVER['REMOTE_ADDR'], // Assumes you're not using a proxy
+                        ],
+                    ]
+                );
+                $response = ["bankToken" => $bankToken->id, "stripeAccount" => $stripeAccount->id, "bankAccount" => $bankAccount->id];
+                $accountDetailModel = new UserAccountDetails();
+                $accountDetailModel->user_id = $requestParam['user_id'];
+                $accountDetailModel->stripe_bank_account_holder_name = $requestParam['stripe_bank_account_holder_name'];
+                $accountDetailModel->stripe_bank_account_holder_type = $requestParam['stripe_bank_account_holder_type'];
+                $accountDetailModel->stripe_bank_routing_number = $requestParam['stripe_bank_routing_number'];
+                $accountDetailModel->stripe_bank_account_number = $requestParam['stripe_bank_account_number'];
+                $accountDetailModel->stripe_bank_token = $response['bankToken'];
+                $accountDetailModel->stripe_connect_account_id = $response['stripeAccount'];
+                $accountDetailModel->stripe_bank_accout_id = $response['bankAccount'];
+                $accountDetailModel->save(false);
+                $amReponseParam = $accountDetailModel;
+                $ssMessage = 'Stripe account detail successfully added.';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+
+            } catch (\Exception $e) {
+                p($e, 0);
+                $ssMessage = 'Something went wrong';
+                $amResponse = Common::errorResponse($ssMessage);
+            }
+
+        } else {
+            $ssMessage = 'Invalid User.';
+            $amResponse = Common::errorResponse($ssMessage);
+        }
+        // FOR ENCODE RESPONSE INTO JSON //
+        Common::encodeResponseJSON($amResponse);
+    }
+
+    public function actionWithdrawFromWallet()
+    {
+        //Get all request parameter
+        $amData = Common::checkRequestType();
+        $amResponse = $amReponseParam = [];
+
+        // Check required validation for request parameter.
+        $amRequiredParams = array('user_id', 'amount');
+        $amParamsResult = Common::checkRequestParameterKey($amData['request_param'], $amRequiredParams);
+
+        // If any getting error in request paramter then set error message.
+        if (!empty($amParamsResult['error'])) {
+            $amResponse = Common::errorResponse($amParamsResult['error']);
+            Common::encodeResponseJSON($amResponse);
+        }
+
+        $requestParam = $amData['request_param'];
+        //Check User Status//
+        Common::matchRole($requestParam['user_id']);
+        Common::matchUserStatus($requestParam['user_id']);
+
+        //VERIFY AUTH TOKEN
+        $authToken = Common::get_header('auth_token');
+        Common::checkAuthentication($authToken);
+        $snUserId = $requestParam['user_id'];
+        $model = Users::findOne(["id" => $snUserId]);
+        $amReponseParam = [];
+        if (!empty($model)) {
+            if (($model->wallet > 100) && ($requestParam['amount'] <= $model->wallet - 100)) {
+                $UserAccountDetails = UserAccountDetails::find()->where(['user_id' => $requestParam['user_id']])->one();
+                if (!empty($UserAccountDetails)) {
+                    \Stripe\Stripe::setApiKey('sk_test_ZBaRU0wL5z8YaEEPUhY3jzgF00tdHXg5cp');
+// Create a PaymentIntent:
+                    try {
+                        $paymentIntent = \Stripe\PaymentIntent::create([
+                            'amount' => $requestParam['amount'],
+                            'currency' => 'usd',
+                            'payment_method_types' => ['card'],
+                            'transfer_group' => '{WITHDRAW' . $requestParam['amount'] . '}',
+
+                        ]);
+                        $transfer = \Stripe\Transfer::create([
+                            'amount' => $requestParam['amount'],
+                            'currency' => 'usd',
+                            'destination' => $UserAccountDetails['stripe_connect_account_id'],
+                            'transfer_group' => '{WITHDRAW' . $requestParam['amount'] . '}',
+                            'source_transaction' => null,
+                        ]);
+
+                        if (!empty($transfer->id)) {
+                            $withdrawDetails = new WithdrawDetails();
+                            $withdrawDetails->user_id = $requestParam['user_id'];
+                            $withdrawDetails->transfer_id = $transfer->id;
+                            $withdrawDetails->amount = $requestParam['amount'];
+                            $withdrawDetails->save(false);
+                            $model->wallet = $model->wallet - $requestParam['amount'];
+                            $model->save(false);
+                            $amReponseParam = $withdrawDetails;
+                            $ssMessage = 'Money Withdrawed successfully to your stripe bank account';
+                            $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                        }
+                    } catch (\Exception $e) {
+                        p($e, 0);
+                        $ssMessage = 'Something went wrong.Please try again later.';
+                        $amResponse = Common::errorResponse($ssMessage);
+                    }
+
+                } else {
+                    $ssMessage = 'Please add your bank account details to withdraw money from wallet.';
+                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                }
+            } else {
+
+                $ssMessage = 'You can not withdraw requested amount as your wallet has isufficient balance';
+                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+            }
+        } else {
+            $ssMessage = 'Invalid User.';
             $amResponse = Common::errorResponse($ssMessage);
         }
         // FOR ENCODE RESPONSE INTO JSON //

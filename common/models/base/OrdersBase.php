@@ -110,7 +110,7 @@ class OrdersBase extends \yii\db\ActiveRecord
      */
     public function getOrderPayments()
     {
-        return $this->hasMany(OrderPayment::className(), ['order_id' => 'id']);
+        return $this->hasOne(OrderPayment::className(), ['order_id' => 'id']);
     }
 
     /**
