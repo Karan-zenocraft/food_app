@@ -1210,7 +1210,7 @@ class DeliveryboyController extends \yii\base\Controller
                 $amResponse = Common::successResponse($ssMessage, $amReponseParam);
 
             } catch (\Exception $e) {
-                p($e);
+                p($e, 0);
                 $ssMessage = 'Something went wrong';
                 $amResponse = Common::errorResponse($ssMessage);
             }
@@ -1285,7 +1285,7 @@ class DeliveryboyController extends \yii\base\Controller
                             $amResponse = Common::successResponse($ssMessage, $amReponseParam);
                         }
                     } catch (\Exception $e) {
-                        p($e);
+                        p($e, 0);
                         $ssMessage = 'Something went wrong.Please try again later.';
                         $amResponse = Common::errorResponse($ssMessage);
                     }
