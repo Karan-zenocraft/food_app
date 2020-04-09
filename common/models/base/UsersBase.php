@@ -6,6 +6,7 @@ use common\models\DeviceDetails;
 use common\models\DriverDocuments;
 use common\models\NotificationList;
 use common\models\Restaurants;
+use common\models\UserAccountDetails;
 use common\models\UserAddress;
 use Yii;
 
@@ -80,7 +81,10 @@ class Users extends \yii\db\ActiveRecord
             'restaurant_id' => 'Restaurant ID',
         ];
     }
-
+    public function getUserAccountDetails()
+    {
+        return $this->hasOne(UserAccountDetails::className(), ['user_id' => 'id']);
+    }
     public function getDriverDocuments()
     {
         return $this->hasMany(DriverDocuments::className(), ['user_id' => 'id']);
