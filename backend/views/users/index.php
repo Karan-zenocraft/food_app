@@ -119,7 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'headerOptions' => ["style" => "width:40%;"],
             'contentOptions' => ["style" => "width:40%;"],
-            'template' => '{update}{manage_documents}{delete}',
+            'template' => '{update}{manage_documents}{withdraw_details}{delete}',
             'buttons' => [
                 'update' => function ($url, $model) {
                     $flag = 1;
@@ -129,7 +129,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     $title = "Manage Documents";
                     $flag = 4;
                     $url = Yii::$app->urlManager->createUrl(['driver-documents/index', 'uid' => $model->id]);
-                    return Common::template_view_gallery_button($url, $model, $title, $flag);
+                    return ($model->role_id == Yii::$app->params['userroles']['delivery_boy']) ? Common::template_view_gallery_button($url, $model, $title, $flag) : "";
+
+                },
+                'withdraw_details' => function ($url, $model) {
+                    $title = "Delivery Boy's withdrawal History";
+                    $flag = 4;
+                    $url = Yii::$app->urlManager->createUrl(['withdraw-details/index', 'uid' => $model->id]);
+                    return ($model->role_id == Yii::$app->params['userroles']['delivery_boy']) ? Common::template_view_gallery_button($url, $model, $title, $flag) : "";
 
                 },
                 'delete' => function ($url, $model) {

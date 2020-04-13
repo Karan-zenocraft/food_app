@@ -1292,12 +1292,12 @@ class DeliveryboyController extends \yii\base\Controller
 
                 } else {
                     $ssMessage = 'Please add your bank account details to withdraw money from wallet.';
-                    $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                    $amResponse = Common::errorResponse($ssMessage);
                 }
             } else {
 
                 $ssMessage = 'You can not withdraw requested amount as your wallet has isufficient balance';
-                $amResponse = Common::successResponse($ssMessage, $amReponseParam);
+                $amResponse = Common::errorResponse($ssMessage);
             }
         } else {
             $ssMessage = 'Invalid User.';
