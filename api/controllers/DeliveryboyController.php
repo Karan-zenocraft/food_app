@@ -1296,7 +1296,7 @@ class DeliveryboyController extends \yii\base\Controller
                 }
             } else {
 
-                $ssMessage = 'You can not withdraw requested amount as your wallet has isufficient balance';
+                $ssMessage = 'You can not withdraw requested amount as your wallet has insufficient balance';
                 $amResponse = Common::errorResponse($ssMessage);
             }
         } else {
